@@ -16,11 +16,62 @@ public:
 	// method to close the database connection
 	static void close();
 
+
+	/// procedure ///
 	// method to insert a procedure into the database
 	static void insertProcedure(string procedureName);
 
 	// method to get all the procedures from the database
 	static void getProcedures(vector<string>& results);
+
+
+	/// variable ///
+	// method to insert a variable into the database
+	static void insertVariable(string variableName);
+
+	// method to get all variables from the database
+	static void getVariables(vector<string>& results);
+
+
+	/// constant /// 
+	// method to insert a constant into the database
+	static void insertConstant(string constantName);
+
+	// method to get all the constants from the database
+	static void getConstants(vector<string>& results);
+
+
+	/// assignment ///
+	// method to insert an assignment into the database
+	static void insertAssignment(string assignmentLine, string lhs, string rhs);
+
+	// method to get all the assignments from the database
+	static void getAssignments(vector<string>& results);
+
+
+	/// statement ///
+	// method to insert a statement into the database
+	static void insertStatement(string statementLine);
+	
+	// method to get all the statements from the database
+	static void getStatements(vector<string>& results);
+
+
+	/// read ///
+	// method to insert a print into the database
+	static void insertRead(string ReadLine);
+	
+	// method to get all the read lines from the database
+	static void getReads(vector<string>& results);
+
+
+	/// print ///
+	// method to insert a print into the database
+	static void insertPrint(string printLine);
+
+	// method to get all the print lines from the database
+	static void getPrints(vector<string>& results);
+
 
 private:
 	// the connection pointer to the database
