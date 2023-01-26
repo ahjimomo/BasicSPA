@@ -17,6 +17,38 @@ void Database::initialize() {
 	string createProcedureTableSQL = "CREATE TABLE procedures ( procedureName VARCHAR(255) PRIMARY KEY);";
 	sqlite3_exec(dbConnection, createProcedureTableSQL.c_str(), NULL, 0, &errorMessage);
 
+	    // drop the existing variable table (if any)
+    string dropVariableTableSQL = "DROP TABLE IF EXISTS variables";
+    sqlite3_exec(dbConnection, dropVariableTableSQL.c_str(), NULL, 0, &errorMessage);
+
+    // create a variable table
+    string createVariableTableSQL = "CREATE TABLE variables ( variableName VARCHAR(255) PRIMARY KEY);";
+    sqlite3_exec(dbConnection, createVariableTableSQL.c_str(), NULL, 0, &errorMessage);
+
+    // drop the existing constant table (if any)
+    string dropConstantTableSQL = "DROP TABLE IF EXISTS constant";
+    sqlite3_exec(dbConnection, dropConstantTableSQL.c_str(), NULL, 0, &errorMessage);
+
+    // create a constant table
+    string createConstantTableSQL = "CREATE TABLE constant( constantValue INT PRIMARY KEY);";
+    sqlite3_exec(dbConnection, createConstantTableSQL.c_str(), NULL, 0, &errorMessage);
+
+    // drop the existing assignment table (if any)
+    string dropAssignmentTableSQL = "DROP TABLE IF EXISTS assignments";
+    sqlite3_exec(dbConnection, dropAssignmentTableSQL.c_str(), NULL, 0, &errorMessage);
+
+    // create an assignment table
+    string createAssignmentTable = "CREATE TABLE assignment ( lines INT PRIMARY KEY);";
+    sqlite3_exec(dbConnection, createConstantTableSQL.c_str(), NULL, 0, &errorMessage);
+
+    // drop the existing statement table (if any)
+    string dropStatementTableSQL = "DROP TABLE IF EXISTS statements";
+    sqlite3_exec(dbConnection, dropStatementTableSQL.c_str(), NULL, 0, &errorMessage);
+
+    // create a statement table
+    string createStatementTable = "CREATE TABLE statements ( stmtno INT PRIMARY KEY);";
+    sqlite3_exec(dbConnection, createStatementTable.c_str(), NULL, 0, &errorMessage);
+
 	// initialize the result vector
 	dbResults = vector<vector<string>>();
 }
