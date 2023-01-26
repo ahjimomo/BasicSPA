@@ -1,6 +1,7 @@
 # BasicSPA
 Basic Static Program Analyzer (SPA) Project
-Version: 0.0.2
+
+<i>Version: 0.0.2</i>
 
 # Collaborators
 - Collaborators: [Yee Lin](https://github.com/echuayl) and [Nicky](https://github.com/ahjimomo)
