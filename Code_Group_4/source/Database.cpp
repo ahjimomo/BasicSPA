@@ -43,8 +43,8 @@ void Database::initialize() {
     sqlite3_exec(dbConnection, dropAssignmentTableSQL.c_str(), NULL, 0, &errorMessage);
 
     // create an assignment table
-    string createAssignmentTable = "CREATE TABLE assignments ( lines VARCHAR(255) PRIMARY KEY, lhs VARCHAR(255), rhs VARCHAR(255));";
-    sqlite3_exec(dbConnection, createConstantTableSQL.c_str(), NULL, 0, &errorMessage);
+    string createAssignmentTable = "CREATE TABLE assignments ( assignmentLines VARCHAR(255), lhs VARCHAR(255), rhs VARCHAR(255));";
+    sqlite3_exec(dbConnection, createAssignmentTable.c_str(), NULL, 0, &errorMessage);
 
     /// Statement ///
 	// drop the existing statement table (if any)
@@ -102,8 +102,8 @@ void Database::insertConstant(string constantValue) {
 }
 
 // method to insert an assignment into the database
-void Database::insertAssignment(string assignmentLine, string lhs, string rhs) {
-	string insertAssignmentSQL = "INSERT INTO assignments ('lines' , 'lhs' , 'rhs') VALUES ('" + assignmentLine + "' , '" + lhs + "' , '" + rhs + "'); ";
+void Database::insertAssignment(string assignmentLines, string lhs, string rhs) {
+	string insertAssignmentSQL = "INSERT INTO assignments ('assignmentLines' , 'lhs' , 'rhs') VALUES ('" + assignmentLines + "' , '" + lhs + "' , '" + rhs + "'); ";
 	sqlite3_exec(dbConnection, insertAssignmentSQL.c_str(), NULL, 0, &errorMessage);
 }
 
@@ -188,7 +188,7 @@ void Database::getAssignments(vector<string>& results) {
 
 	// retrieve the assignments from the assignments table
 	// The callback method is only used when there are results to be returned.
-	string getAssignmentSQL = "SELECT lines FROM assignments;";
+	string getAssignmentSQL = "SELECT assignmentLines FROM assignments;";
 	sqlite3_exec(dbConnection, getAssignmentSQL.c_str(), callback, 0, &errorMessage);
 
 	// postprocess the results from the database so that the output is just a vector

@@ -252,6 +252,8 @@ void SourceProcessor::processIdx(string option)
 	else if (option == "statement")
 	{
 		Database::insertStatement(saveLineIdx);
+		//Database::insertModifies(saveLineIdx, tokensList.front());
+		//Database::insertUses(saveLineIdx, tokensList.front());
 	}
 }
 

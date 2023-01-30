@@ -47,7 +47,7 @@ public:
 
 	/// assignment ///
 	// method to insert an assignment into the database
-	static void insertAssignment(string assignmentLine, string lhs, string rhs);
+	static void insertAssignment(string assignmentLines, string lhs, string rhs);
 
 	// method to get all the assignments from the database
 	static void getAssignments(vector<string>& results);
