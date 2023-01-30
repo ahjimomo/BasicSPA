@@ -35,10 +35,14 @@ public:
 
 	/// constant /// 
 	// method to insert a constant into the database
-	static void insertConstant(string constantName);
+	// Error with creating constant table with [name, value] pair column as of 30 Jan 2023
+	static void insertConstant(string constantValue);
 
-	// method to get all the constants from the database
+	// method to get all the constant values from the database
 	static void getConstants(vector<string>& results);
+
+	// method to insert a single existing constant based on existing value of the same constant
+	//static void insertExistingConstant(string constantName);
 
 
 	/// assignment ///

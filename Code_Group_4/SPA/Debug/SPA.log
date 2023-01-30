@@ -1,5 +1,5 @@
-﻿  Database.cpp
-  QueryProcessor.cpp
-  SourceProcessor.cpp
-  Generating Code...
+﻿  SourceProcessor.cpp
+C:\Users\User\Desktop\Nicky\NUS\TIC2003 Software Development Project\workspace\BasicSPA\Code_Group_4\source\SourceProcessor.cpp(28,11): warning C4018: '<': signed/unsigned mismatch
+C:\Users\User\Desktop\Nicky\NUS\TIC2003 Software Development Project\workspace\BasicSPA\Code_Group_4\source\SourceProcessor.cpp(57,31): warning C4101: 'e': unreferenced local variable
   SPA.vcxproj -> C:\Users\User\Desktop\Nicky\NUS\TIC2003 Software Development Project\workspace\BasicSPA\Code_Group_4\Debug\SPA.lib
+  Warning: Full debug symbol generation from partial PDBs is not supported for static libraries.

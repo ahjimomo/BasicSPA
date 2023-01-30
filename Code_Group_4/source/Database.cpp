@@ -34,7 +34,7 @@ void Database::initialize() {
     sqlite3_exec(dbConnection, dropConstantTableSQL.c_str(), NULL, 0, &errorMessage);
 
     // create a constant table
-    string createConstantTableSQL = "CREATE TABLE constant( constantValue INT PRIMARY KEY);";
+    string createConstantTableSQL = "CREATE TABLE constant( constantValue VARCHAR(255));";
     sqlite3_exec(dbConnection, createConstantTableSQL.c_str(), NULL, 0, &errorMessage);
 
 	/// Assignment ///
@@ -43,7 +43,7 @@ void Database::initialize() {
     sqlite3_exec(dbConnection, dropAssignmentTableSQL.c_str(), NULL, 0, &errorMessage);
 
     // create an assignment table
-    string createAssignmentTable = "CREATE TABLE assignments ( lines INT PRIMARY KEY);";
+    string createAssignmentTable = "CREATE TABLE assignments ( lines VARCHAR(255) PRIMARY KEY, lhs VARCHAR(255), rhs VARCHAR(255));";
     sqlite3_exec(dbConnection, createConstantTableSQL.c_str(), NULL, 0, &errorMessage);
 
     /// Statement ///
@@ -52,7 +52,7 @@ void Database::initialize() {
     sqlite3_exec(dbConnection, dropStatementTableSQL.c_str(), NULL, 0, &errorMessage);
 
     // create a statement table
-    string createStatementTable = "CREATE TABLE statements ( stmtno INT PRIMARY KEY);";
+    string createStatementTable = "CREATE TABLE statements ( stmtLine VARCHAR(255) PRIMARY KEY);";
     sqlite3_exec(dbConnection, createStatementTable.c_str(), NULL, 0, &errorMessage);
 
 	/// Read ///
@@ -96,20 +96,21 @@ void Database::insertVariable(string variableName) {
 }
 
 // method to insert a constant into the database
-void Database::insertConstant(string constantName) {
-	string insertConstantSQL = "INSERT INTO constants ('constantName') VALUES ('" + constantName + "');";
+void Database::insertConstant(string constantValue) {
+	string insertConstantSQL = "INSERT INTO constants ('constantValue') VALUES ('" + constantValue + "'); ";
 	sqlite3_exec(dbConnection, insertConstantSQL.c_str(), NULL, 0, &errorMessage);
 }
 
 // method to insert an assignment into the database
 void Database::insertAssignment(string assignmentLine, string lhs, string rhs) {
-	string insertAssignmentSQL = "INSERT INTO assignments ('line' , 'lhs' , 'rhs') VALUES ('" + assignmentLine + "' , '" + lhs + "' , '" + rhs + "'); ";
+	string insertAssignmentSQL = "INSERT INTO assignments ('lines' , 'lhs' , 'rhs') VALUES ('" + assignmentLine + "' , '" + lhs + "' , '" + rhs + "'); ";
 	sqlite3_exec(dbConnection, insertAssignmentSQL.c_str(), NULL, 0, &errorMessage);
 }
 
+
 // method to insert a statement into the database
 void Database::insertStatement(string statementLine) {
-	string insertStatementSQL = "INSERT INTO statements ('line') VALUES ('" + statementLine + "');";
+	string insertStatementSQL = "INSERT INTO statements ('stmtLine') VALUES ('" + statementLine + "');";
 	sqlite3_exec(dbConnection, insertStatementSQL.c_str(), NULL, 0, &errorMessage);
 }
 
@@ -149,12 +150,12 @@ void Database::getVariables(vector<string>& results) {
 	// clear the existing results
 	dbResults.clear();
 
-	// retrieve the procedures from the procedure table
+	// retrieve the variables from the variable table
 	// The callback method is only used when there are results to be returned.
 	string getVariableSQL = "SELECT * FROM variables;";
 	sqlite3_exec(dbConnection, getVariableSQL.c_str(), callback, 0, &errorMessage);
 
-	// postprocess the results from the database so that the output is just a vector of procedure names
+	// postprocess the results from the database so that the output is just a vector
 	for (vector<string> dbRow : dbResults) {
 		string result;
 		result = dbRow.at(0);
@@ -162,17 +163,17 @@ void Database::getVariables(vector<string>& results) {
 	}
 }
 
-// method to get all the constants from the database
+// method to get all the constants values from the database
 void Database::getConstants(vector<string>& results) {
 	// clear the existing results
 	dbResults.clear();
 
-	// retrieve the procedures from the procedure table
+	// retrieve the constants from the constants table
 	// The callback method is only used when there are results to be returned.
 	string getConstantSQL = "SELECT * FROM constants;";
 	sqlite3_exec(dbConnection, getConstantSQL.c_str(), callback, 0, &errorMessage);
 
-	// postprocess the results from the database so that the output is just a vector of procedure names
+	// postprocess the results from the database so that the output is just a vector
 	for (vector<string> dbRow : dbResults) {
 		string result;
 		result = dbRow.at(0);
@@ -185,12 +186,12 @@ void Database::getAssignments(vector<string>& results) {
 	// clear the existing results
 	dbResults.clear();
 
-	// retrieve the procedures from the procedure table
+	// retrieve the assignments from the assignments table
 	// The callback method is only used when there are results to be returned.
-	string getAssignmentSQL = "SELECT line FROM assignments;";
+	string getAssignmentSQL = "SELECT lines FROM assignments;";
 	sqlite3_exec(dbConnection, getAssignmentSQL.c_str(), callback, 0, &errorMessage);
 
-	// postprocess the results from the database so that the output is just a vector of procedure names
+	// postprocess the results from the database so that the output is just a vector
 	for (vector<string> dbRow : dbResults) {
 		string result;
 		result = dbRow.at(0);
@@ -203,12 +204,12 @@ void Database::getStatements(vector<string>& results) {
 	// clear the existing results
 	dbResults.clear();
 
-	// retrieve the procedures from the procedure table
+	// retrieve the statements from the statement table
 	// The callback method is only used when there are results to be returned.
 	string getStatementSQL = "SELECT * FROM statements;";
 	sqlite3_exec(dbConnection, getStatementSQL.c_str(), callback, 0, &errorMessage);
 
-	// postprocess the results from the database so that the output is just a vector of procedure names
+	// postprocess the results from the database so that the output is just a vector
 	for (vector<string> dbRow : dbResults) {
 		string result;
 		result = dbRow.at(0);
@@ -216,17 +217,17 @@ void Database::getStatements(vector<string>& results) {
 	}
 }
 
-// method to get all the read statements from the database
+// method to get all the read lines from the database
 void Database::getReads(vector<string>& results) {
 	// clear the existing results
 	dbResults.clear();
 
-	// retrieve the procedures from the procedure table
+	// retrieve the read lines from the reads table
 	// The callback method is only used when there are results to be returned.
 	string getReadSQL = "SELECT * FROM reads;";
 	sqlite3_exec(dbConnection, getReadSQL.c_str(), callback, 0, &errorMessage);
 
-	// postprocess the results from the database so that the output is just a vector of procedure names
+	// postprocess the results from the database so that the output is just a vector
 	for (vector<string> dbRow : dbResults) {
 		string result;
 		result = dbRow.at(0);
@@ -239,18 +240,30 @@ void Database::getPrints(vector<string>& results) {
 	// clear the existing results
 	dbResults.clear();
 
-	// retrieve the procedures from the procedure table
+	// retrieve the print lines from the print table
 	// The callback method is only used when there are results to be returned.
 	string getPrintSQL = "SELECT * FROM prints;";
 	sqlite3_exec(dbConnection, getPrintSQL.c_str(), callback, 0, &errorMessage);
 
-	// postprocess the results from the database so that the output is just a vector of procedure names
+	// postprocess the results from the database so that the output is just a vector
 	for (vector<string> dbRow : dbResults) {
 		string result;
 		result = dbRow.at(0);
 		results.push_back(result);
 	}
 }
+
+///// Special Method /////
+//void Database::insertExistingConstant(string constantName) 
+//{
+//	// clear the existing results
+//	dbResults.clear();
+//
+//	// Insert constant values or create new value with 'NULL' value
+//	string insertSingleConstantSQL = "INSERT INTO constants (constantName, constantValue) VALUES  ('" + constantName + "', (SELECT constantValue FROM constants WHERE constantname = '" + constantName + "' ORDER BY RowID DESC LIMIT 1));";
+//	sqlite3_exec(dbConnection, insertSingleConstantSQL.c_str(), callback, 0, &errorMessage);
+//}
+
 
 // callback method to put one row of results from the database into the dbResults vector
 // This method is called each time a row of results is returned from the database
