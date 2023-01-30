@@ -1,7 +1,7 @@
 <?xml-stylesheet type="text/xsl" href="analysis.xsl"?>
 <test_results>
 <info>
-<name>Debug</name><parsing_time_taken>32.000000</parsing_time_taken>
+<name>Debug</name><parsing_time_taken>47.000000</parsing_time_taken>
 </info>
 <queries>
 <query>
@@ -15,7 +15,7 @@
 <id ReturnTuple="1" CondNum="1" RelNum="0" comment="Variable">2</id><querystr><![CDATA[variable v; Select v]]></querystr>
 <stuans></stuans>
 <correct>num1,index</correct>
-<time_taken>5.000000</time_taken>
+<time_taken>6.000000</time_taken>
 <failed>
 <missing>index,num1</missing>
 <additional></additional>
@@ -54,7 +54,7 @@
 <id ReturnTuple="1" CondNum="1" RelNum="0" comment="Print">5</id><querystr><![CDATA[print pr; Select pr]]></querystr>
 <stuans></stuans>
 <correct>3,4</correct>
-<time_taken>9.000000</time_taken>
+<time_taken>6.000000</time_taken>
 <failed>
 <missing>3,4</missing>
 <additional></additional>
@@ -70,7 +70,7 @@
 <id ReturnTuple="1" CondNum="1" RelNum="0" comment="Read">6</id><querystr><![CDATA[read rd; Select rd]]></querystr>
 <stuans></stuans>
 <correct>1</correct>
-<time_taken>8.000000</time_taken>
+<time_taken>6.000000</time_taken>
 <failed>
 <missing>1</missing>
 <additional></additional>
@@ -86,7 +86,7 @@
 <id ReturnTuple="1" CondNum="1" RelNum="0" comment="Statement">7</id><querystr><![CDATA[stmt s; Select s]]></querystr>
 <stuans></stuans>
 <correct>1,2,3,4</correct>
-<time_taken>7.000000</time_taken>
+<time_taken>9.000000</time_taken>
 <failed>
 <missing>1,2,3,4</missing>
 <additional></additional>
