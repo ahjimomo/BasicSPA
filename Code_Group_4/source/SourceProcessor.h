@@ -38,4 +38,5 @@ public:
 	//void print_exception(const std::exception&, int level);
 	string intToStr(int value);
 	int strToInt(string value);
+	string getConstantValue(string constantName);
 };

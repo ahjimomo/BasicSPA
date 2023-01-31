@@ -30,11 +30,11 @@ void Database::initialize() {
 
 	/// Constant ///
     // drop the existing constant table (if any)
-    string dropConstantTableSQL = "DROP TABLE IF EXISTS constant";
+    string dropConstantTableSQL = "DROP TABLE IF EXISTS constants";
     sqlite3_exec(dbConnection, dropConstantTableSQL.c_str(), NULL, 0, &errorMessage);
 
     // create a constant table
-    string createConstantTableSQL = "CREATE TABLE constant( constantValue VARCHAR(255));";
+    string createConstantTableSQL = "CREATE TABLE constants( constantName VARCHAR(255), constantValue VARCHAR(255));";
     sqlite3_exec(dbConnection, createConstantTableSQL.c_str(), NULL, 0, &errorMessage);
 
 	/// Assignment ///
@@ -96,8 +96,8 @@ void Database::insertVariable(string variableName) {
 }
 
 // method to insert a constant into the database
-void Database::insertConstant(string constantValue) {
-	string insertConstantSQL = "INSERT INTO constants ('constantValue') VALUES ('" + constantValue + "'); ";
+void Database::insertConstant(string constantName, string constantValue) {
+	string insertConstantSQL = "INSERT INTO constants ('constantName', 'constantValue') VALUES ('" + constantName + "', '" + constantValue + "'); ";
 	sqlite3_exec(dbConnection, insertConstantSQL.c_str(), NULL, 0, &errorMessage);
 }
 
@@ -170,7 +170,7 @@ void Database::getConstants(vector<string>& results) {
 
 	// retrieve the constants from the constants table
 	// The callback method is only used when there are results to be returned.
-	string getConstantSQL = "SELECT * FROM constants;";
+	string getConstantSQL = "SELECT constantValue FROM constants;";
 	sqlite3_exec(dbConnection, getConstantSQL.c_str(), callback, 0, &errorMessage);
 
 	// postprocess the results from the database so that the output is just a vector
@@ -252,17 +252,6 @@ void Database::getPrints(vector<string>& results) {
 		results.push_back(result);
 	}
 }
-
-///// Special Method /////
-//void Database::insertExistingConstant(string constantName) 
-//{
-//	// clear the existing results
-//	dbResults.clear();
-//
-//	// Insert constant values or create new value with 'NULL' value
-//	string insertSingleConstantSQL = "INSERT INTO constants (constantName, constantValue) VALUES  ('" + constantName + "', (SELECT constantValue FROM constants WHERE constantname = '" + constantName + "' ORDER BY RowID DESC LIMIT 1));";
-//	sqlite3_exec(dbConnection, insertSingleConstantSQL.c_str(), callback, 0, &errorMessage);
-//}
 
 
 // callback method to put one row of results from the database into the dbResults vector

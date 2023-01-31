@@ -1,8 +1,10 @@
 #include "SourceProcessor.h"
 
-#include <regex> // C++ regex library for regex expressions
-#include <list>  // Use of list vs. vector (https://www.educba.com/c-plus-plus-vector-vs-list/)
+#include <regex>	// C++ regex library for regex expressions
+#include <list>		// Use of list vs. vector (https://www.educba.com/c-plus-plus-vector-vs-list/)
 #include <iostream>
+#include <map>		// Use of map to store constantname and values
+#include <string>
 
 #define NUM_EXPR "[0-9]+"
 #define NAME_EXPR "[a-zA-Z]+[0-9]*"
@@ -37,8 +39,9 @@ void SourceProcessor::process(string program)
 }
 
 ///// Parameters /////
-int curLineIdx = 1;		// int to track line we are at
-int constCounter = 0;	// int to use as alias name to avoid duplication
+int curLineIdx = 1;						// int to track line we are at
+int constCounter = 0;					// int to use as alias name to avoid duplication
+std::map<string, int> cval;				// map to store constant values [string-int pair]
 
 ///// Methods to process source /////
 // iter 1: method to take in tokens for processing (first step to check on procedure)
@@ -269,15 +272,18 @@ void SourceProcessor::parseConstant(string option)
 		constCounter++;
 
 		// Insert int value as string into constant table in DB
-		Database::insertConstant(TokensList.front());
+		Database::insertConstant(constName, TokensList.front());
 	}
 	// if constant provided is a variable, check if there is an existing value to use else just insert
 	else if (option == "name")
 	{
-		// [Future] Get existing variable values if exist
+		// Return variable value as string, return 'None' if variable does not exist and create key in map
+		string val = getConstantValue(TokensList.front());
 
 		// [Future] Tabulate new value
-		Database::insertConstant(TokensList.front()); // Error in creating table for constant with [name, value] pair, reverting to value only for iter 1 as of 30 Jan 2023
+
+		// Insert constant-value pair to constants table
+		Database::insertConstant(TokensList.front(), val);
 	}
 }
 
@@ -354,4 +360,21 @@ int SourceProcessor::strToInt(string value)
 {
 	int valueInInt = stoi(value);
 	return valueInInt;
+}
+
+// iter 1: support method to check if constant is in map else create key with value = 'None'
+string SourceProcessor::getConstantValue(string constantName)
+{
+	// Check if constant exists
+	std::cout << constantName << " has value of " << cval[constantName] << "!";
+	int int_result = cval[constantName]; // (Non-existent key should perform an insert with value of 0: https://en.cppreference.com/w/cpp/container/map)
+
+	if (int_result == 0)
+	{
+		return "None";
+	}
+	else
+	{
+		return intToStr(int_result);
+	}
 }
