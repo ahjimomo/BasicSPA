@@ -1,7 +1,7 @@
 procedure echo { 
     read num1;
     num2 = num1;
-    index = 1;
+    index = 0;
 
     print num1;
     print index;

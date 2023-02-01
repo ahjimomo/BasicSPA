@@ -1,9 +1,9 @@
 #include "SourceProcessor.h"
 
-#include <regex>	// C++ regex library for regex expressions
-#include <list>		// Use of list vs. vector (https://www.educba.com/c-plus-plus-vector-vs-list/)
+#include <regex>			// C++ regex library for regex expressions
+#include <list>				// Use of list vs. vector (https://www.educba.com/c-plus-plus-vector-vs-list/)
 #include <iostream>
-#include <map>		// Use of map to store constantname and values
+#include <unordered_map>	// Use of map to store constantname and values
 #include <string>
 #include <iterator>
 
@@ -42,7 +42,7 @@ void SourceProcessor::process(string program)
 ///// Parameters /////
 int curLineIdx = 1;						// int to track line we are at
 int constCounter = 0;					// int to use as alias name to avoid duplication
-std::map<string, int> cval;				// map to store constant values [string-int pair]
+std::unordered_map<string, int> cval;	// map to store constant values [string-int pair]
 
 ///// Methods to process source /////
 // iter 1: method to take in tokens for processing (first step to check on procedure)
@@ -271,7 +271,9 @@ void SourceProcessor::parseConstant(string option)
 	{
 		// Define temp alias
 		string curLine = intToStr(curLineIdx);
-		string constName = curLineIdx + "_" + constCounter;
+		string curCounter = intToStr(constCounter);
+		string underscore = "_";
+		string constName = curLine + underscore + curCounter;
 		constCounter++;
 
 		// Insert int value as string into constant table in DB
@@ -369,15 +371,15 @@ int SourceProcessor::strToInt(string value)
 string SourceProcessor::getConstantValue(string constantName)
 {
 	// Check if constant exists
-	std::cout << constantName << " has value of " << cval[constantName] << "!";
-	int int_result = cval[constantName]; // (Non-existent key should perform an insert with value of 0: https://en.cppreference.com/w/cpp/container/map)
-
-	if (int_result == 0)
+	if (cval.count(constantName))
 	{
-		return "none";
+		int int_result = cval[constantName];
+		return intToStr(int_result);
 	}
 	else
 	{
-		return intToStr(int_result);
+		int int_result = cval[constantName]; // (Non-existent key should perform an insert with value of 0: https://en.cppreference.com/w/cpp/container/map)
+		return "none";
+
 	}
 }
