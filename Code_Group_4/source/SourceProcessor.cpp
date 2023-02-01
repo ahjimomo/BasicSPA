@@ -5,6 +5,7 @@
 #include <iostream>
 #include <map>		// Use of map to store constantname and values
 #include <string>
+#include <iterator>
 
 #define NUM_EXPR "[0-9]+"
 #define NAME_EXPR "[a-zA-Z]+[0-9]*"
@@ -131,7 +132,7 @@ void SourceProcessor::parseStatement()
 			expectedSymbol(";");
 		}
 		// else. if it's none of the above methods, it should be a direct assignment 
-		else 
+		else if (checkName(TokensList.front()) == true)
 		{
 			parseAssignment();
 			expectedSymbol(";");
@@ -141,7 +142,6 @@ void SourceProcessor::parseStatement()
 		processIdx("statement");
 		// Update count of line & move to next element
 		curLineIdx++;
-		// next_token() // iter 1: Moved to next element by expectedSymbol() method for ease of checking
 	}
 
 }
@@ -169,9 +169,12 @@ void SourceProcessor::parseAssignment()
 	{
 		while (TokensList.front() != ";")
 		{
-			// Get lhs name
+			// Get lhs & rhs
 			string lhs = TokensList.front();
 			string rhs;
+
+			// Insert lhs as variable
+			parseVariable();
 
 			// [Future] Checked if target exists, return value if yes, else creates constant as 0 or None
 
@@ -371,7 +374,7 @@ string SourceProcessor::getConstantValue(string constantName)
 
 	if (int_result == 0)
 	{
-		return "None";
+		return "none";
 	}
 	else
 	{

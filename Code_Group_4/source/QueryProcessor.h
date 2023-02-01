@@ -14,6 +14,9 @@ public:
 	// destructor
 	~QueryProcessor();
 
-	// method for evaluating a query
+	///// Main Methods /////
 	void evaluate(string query, vector<string>& results);
+
+	///// Support Methods /////
+	//void postProcessQuery(vector<vector<string>>& dbResults, vector<string>& results);
 };
