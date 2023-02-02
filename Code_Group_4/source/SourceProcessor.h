@@ -19,16 +19,16 @@ public:
 	void parser(list<string> tokens);
 
 	// methods to evaluate/parse tokens for database
-	void parseProcedure();		// 1: Check for procedure
-	void parseStatement();		// 2: Check for statement
-	void parseVariable();		// 2A: Process variable
-	void parseAssignment();		// 3: Process Assignment
-	void parseAssignee();		// 3A: Process Assignments
+	void parseProcedure();							// 1: Check for procedure
+	void parseStatement();							// 2: Check for statement
+	void parseVariable();							// 2A: Process variable
+	void parseAssignment();							// 3: Process Assignment
+	void parseAssignee(string lhs, string rhs);		// 3A: Process Assignments
 	//void parseExpression(); // Check for expression
 
 	// Main Supporting methods
 	void processIdx(string option);
-	void parseConstant(string option);
+	string parseConstant(string option);
 
 	// Side Supporting methods
 	bool checkName(string token);
@@ -39,4 +39,5 @@ public:
 	string intToStr(int value);
 	int strToInt(string value);
 	string getConstantValue(string constantName);
+	void updateConstantMap(string constantName, string value);
 };

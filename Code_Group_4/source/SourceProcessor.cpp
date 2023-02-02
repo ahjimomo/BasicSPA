@@ -193,7 +193,7 @@ void SourceProcessor::parseAssignment()
 				string rhs = TokensList.front();
 
 				// Parse in assignee to DB
-				parseAssignee();
+				parseAssignee(lhs, rhs);
 				// [Future]
 				//parseModifies(); // update modifies(rhs, lhs)
 
@@ -212,18 +212,36 @@ void SourceProcessor::parseAssignment()
 }
 
 // iter 1: method to process assigned values
-void SourceProcessor::parseAssignee()
+void SourceProcessor::parseAssignee(string lhs, string rhs)
 {
 	while (TokensList.front() != ";")
 	{
 		// Check if assignment is an integer value
 		if (checkNum(TokensList.front()) == true)
 		{
-			parseConstant("value");
+			string val = parseConstant("value");
+
+			// Insert constant-value pair to constants table
+			Database::insertConstant(lhs, val);
+
+			// Update cval on key-pair value
+			updateConstantMap(lhs, val);
 		}
+		// if asignee is a variable, get variable existing value
 		else if (checkName(TokensList.front()) == true)
 		{
-			parseConstant("name");
+			string val = parseConstant("name");
+
+			// Insert constant-value pair to constants table if there is an existing value from the variable else skip
+			if (val != "none")
+			{
+				Database::insertConstant(lhs, val);
+
+				// Update cval on key-pair value(s)
+				updateConstantMap(lhs, val);
+			}
+
+
 		}
 		// [Future] check if assignment is a factor/term
 		
@@ -264,31 +282,20 @@ void SourceProcessor::processIdx(string option)
 }
 
 // iter 1: method to process constant
-void SourceProcessor::parseConstant(string option)
+string SourceProcessor::parseConstant(string option)
 {
 	// if constant provided is an integer, use line as temp alias to create value ([curLineIdx] + [constCounter])
 	if (option == "value") 
 	{
-		// Define temp alias
-		string curLine = intToStr(curLineIdx);
-		string curCounter = intToStr(constCounter);
-		string underscore = "_";
-		string constName = curLine + underscore + curCounter;
-		constCounter++;
-
-		// Insert int value as string into constant table in DB
-		Database::insertConstant(constName, TokensList.front());
+		return TokensList.front();
 	}
 	// if constant provided is a variable, check if there is an existing value to use else just insert
 	else if (option == "name")
 	{
-		// Return variable value as string, return 'None' if variable does not exist and create key in map
+		// Return variable value as string, return 'none' if variable does not exist and create key in map
 		string val = getConstantValue(TokensList.front());
 
-		// [Future] Tabulate new value
-
-		// Insert constant-value pair to constants table
-		Database::insertConstant(TokensList.front(), val);
+		return val;
 	}
 }
 
@@ -378,8 +385,14 @@ string SourceProcessor::getConstantValue(string constantName)
 	}
 	else
 	{
-		int int_result = cval[constantName]; // (Non-existent key should perform an insert with value of 0: https://en.cppreference.com/w/cpp/container/map)
+		//int int_result = cval[constantName]; // (Non-existent key should perform an insert with value of 0: https://en.cppreference.com/w/cpp/container/map)
 		return "none";
-
 	}
+}
+
+// iter 1: support method to update constant in local map for future usage [Modifies Value]
+void SourceProcessor::updateConstantMap(string constantName, string value)
+{
+	// Update map value or create if it does not exist
+	cval[constantName] = strToInt(value);
 }

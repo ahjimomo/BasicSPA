@@ -11,7 +11,7 @@ num1, num2, index
 3 - Constant
 constant c;
 Select c
-none, 0
+0
 5000
 4 - Assignment
 assign a;
