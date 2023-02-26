@@ -76,6 +76,51 @@ void Database::initialize() {
     string createPrintTableSQL = "CREATE TABLE prints ( line VARCHAR(255) PRIMARY KEY);";
     sqlite3_exec(dbConnection, createPrintTableSQL.c_str(), NULL, 0, &errorMessage);
 
+    /// While ///
+    // drop the existing while table (if any)
+    string dropWhileTableSQL = "DROP TABLE IF EXISTS whiles";
+    sqlite3_exec(dbConnection, dropWhileTableSQL.c_str(), NULL, 0, &errorMessage);
+
+    // create a while table
+    string createWhileTableSQL = "CREATE TABLE whiles ( line VARCHAR(255) PRIMARY KEY);";
+    sqlite3_exec(dbConnection, createWhileTableSQL.c_str(), NULL, 0, &errorMessage);
+
+    /// Pattern ///
+    // drop the existing patterns table (if any)
+    string dropPatternTableSQL = "DROP TABLE IF EXISTS patterns";
+    sqlite3_exec(dbConnection, dropPatternTableSQL.c_str(), NULL, 0, &errorMessage);
+
+    // create a patterns table
+    string createPatternTable = "CREATE TABLE patterns ( patternLine VARCHAR(255) PRIMARY KEY, lhs VARCHAR(255), rhs VARCHAR(255));";
+    sqlite3_exec(dbConnection, createPatternTable.c_str(), NULL, 0, &errorMessage);
+
+    /// Uses ///
+    // drop the existing uses table (if any)
+    string dropUseTableSQL = "DROP TABLE IF EXISTS uses";
+    sqlite3_exec(dbConnection, dropUseTableSQL.c_str(), NULL, 0, &errorMessage);
+
+    // create a uses table
+    string createUseTable = "CREATE TABLE uses ( useLine VARCHAR(255), user VARCHAR(255), used VARCHAR(255), type VARCHAR(255));";
+    sqlite3_exec(dbConnection, createUseTable.c_str(), NULL, 0, &errorMessage);
+
+    /// Calls* ///
+    // drop the existing callStars table (if any)
+    string dropCallStarTableSQL = "DROP TABLE IF EXISTS callStars";
+    sqlite3_exec(dbConnection, dropCallStarTableSQL.c_str(), NULL, 0, &errorMessage);
+
+    // create a callStars table
+    string createCallStarsTable = "CREATE TABLE callStars ( callLine VARCHAR(255), preceding VARCHAR(255), calledP VARCHAR(255));";
+    sqlite3_exec(dbConnection, createCallStarsTable.c_str(), NULL, 0, &errorMessage);
+
+    /// Calls ///
+    // drop the existing calls table (if any)
+    string dropCallTableSQL = "DROP TABLE IF EXISTS calls";
+    sqlite3_exec(dbConnection, dropCallTableSQL.c_str(), NULL, 0, &errorMessage);
+
+    // create a calls table
+    string createCallsTable = "CREATE TABLE calls ( callLine VARCHAR(255), precedence VARCHAR(255), calledP VARCHAR(255));";
+    sqlite3_exec(dbConnection, createCallsTable.c_str(), NULL, 0, &errorMessage);
+
     // initialize the result vector
     dbResults = vector<vector<string>>();
 }
@@ -110,7 +155,6 @@ void Database::insertAssignment(string assignmentLines, string lhs, string rhs) 
     sqlite3_exec(dbConnection, insertAssignmentSQL.c_str(), NULL, 0, &errorMessage);
 }
 
-
 // method to insert a statement into the database
 void Database::insertStatement(string statementLine) {
     string insertStatementSQL = "INSERT INTO statements ('stmtLine') VALUES ('" + statementLine + "');";
@@ -129,6 +173,35 @@ void Database::insertPrint(string printLine) {
     sqlite3_exec(dbConnection, insertPrintSQL.c_str(), NULL, 0, &errorMessage);
 }
 
+// iter 2: method to insert a while into the database
+void Database::insertWhile(string whileLine) {
+    string insertWhileSQL = "INSERT INTO whiles ('line') VALUES ('" + whileLine + "');";
+    sqlite3_exec(dbConnection, insertWhileSQL.c_str(), NULL, 0, &errorMessage);
+}
+
+// iter 2: method to insert an pattern into the database
+void Database::insertPattern(string patternLine, string lhs, string rhs) {
+    string insertPatternSQL = "INSERT INTO patterns ('patternLine' , 'lhs' , 'rhs') VALUES ('" + patternLine + "' , '" + lhs + "' , '" + rhs + "'); ";
+    sqlite3_exec(dbConnection, insertPatternSQL.c_str(), NULL, 0, &errorMessage);
+}
+
+// iter 2: method to insert an use into the database
+void Database::insertUse(string useLine, string user, string used, string type) {
+    string insertUseSQL = "INSERT INTO uses ('useLine' , 'user' , 'used', 'type') VALUES ('" + useLine + "' , '" + user + "' , '" + used + "', '" + type + "'); ";
+    sqlite3_exec(dbConnection, insertUseSQL.c_str(), NULL, 0, &errorMessage);
+}
+
+// iter 2: method to insert a call-star into the database
+void Database::insertCallStar(string callLine, string preceding, string calledP) {
+    string insertCallStarSQL = "INSERT INTO callStars ('callLine' , 'preceding' , 'calledP') VALUES ('" + callLine + "' , '" + preceding + "' , '" + calledP + "'); ";
+    sqlite3_exec(dbConnection, insertCallStarSQL.c_str(), NULL, 0, &errorMessage);
+}
+
+// iter 2: method to insert a call into the database
+void Database::insertCall(string callLine, string precedence, string calledP) {
+    string insertCallSQL = "INSERT INTO calls ('callLine' , 'precedence' , 'calledP') VALUES ('" + callLine + "' , '" + precedence + "' , '" + calledP + "'); ";
+    sqlite3_exec(dbConnection, insertCallSQL.c_str(), NULL, 0, &errorMessage);
+}
 
 ///// PostProcess Result /////
 void Database::postProcess( vector<vector<string>>& dbResults, vector<string>& results ) {
@@ -140,6 +213,76 @@ void Database::postProcess( vector<vector<string>>& dbResults, vector<string>& r
 }
 
 ///// Get /////
+// iter 2: method to get all the calls (1 preceding procedure only) from the database
+void Database::getCalls(vector<string>& results) {
+    // clear the existing results
+    dbResults.clear();
+
+    // retrieve the (preceding procedure, current procedure) from the calls table
+    // The callback method is only used when there are results to be returned.
+    string getCallsSQL = "SELECT precedence, calledP FROM calls;";
+    sqlite3_exec(dbConnection, getCallsSQL.c_str(), callback, 0, &errorMessage);
+
+    // postprocess the results from the database so that the output is just a vector of procedure names
+    postProcess(dbResults, results);
+}
+
+// iter 2: method to get all the calls (all preceding procedures) from the database
+void Database::getCallStars(vector<string>& results) {
+    // clear the existing results
+    dbResults.clear();
+
+    // retrieve the procedures from the callStars table
+    // The callback method is only used when there are results to be returned.
+    string getCallStarsSQL = "SELECT preceding, calledP FROM callStars;";
+    sqlite3_exec(dbConnection, getCallStarsSQL.c_str(), callback, 0, &errorMessage);
+
+    // postprocess the results from the database so that the output is just a vector of procedure names
+    postProcess(dbResults, results);
+}
+ 
+// iter 2: method to get all the uses (user, use, type) from the database
+void Database::getUses(vector<string>& results) {
+    // clear the existing results
+    dbResults.clear();
+
+    // retrieve the procedures from the whiles table
+    // The callback method is only used when there are results to be returned.
+    string getUsesSQL = "SELECT user, used, type FROM uses;";
+    sqlite3_exec(dbConnection, getUsesSQL.c_str(), callback, 0, &errorMessage);
+
+    // postprocess the results from the database so that the output is just a vector of procedure names
+    postProcess(dbResults, results);
+}
+ 
+// iter 2: method to get all the patterns (lhs, rhs) from the database
+void Database::getPatterns(vector<string>& results) {
+    // clear the existing results
+    dbResults.clear();
+
+    // retrieve the procedures from the whiles table
+    // The callback method is only used when there are results to be returned.
+    string getPatternsSQL = "SELECT lhs, rhs FROM patterns;";
+    sqlite3_exec(dbConnection, getPatternsSQL.c_str(), callback, 0, &errorMessage);
+
+    // postprocess the results from the database so that the output is just a vector of procedure names
+    postProcess(dbResults, results);
+}
+ 
+// iter 2: method to get all the while statements from the database
+void Database::getWhile(vector<string>& results) {
+    // clear the existing results
+    dbResults.clear();
+
+    // retrieve the procedures from the whiles table
+    // The callback method is only used when there are results to be returned.
+    string getWhilesSQL = "SELECT * FROM whiles;";
+    sqlite3_exec(dbConnection, getWhilesSQL.c_str(), callback, 0, &errorMessage);
+
+    // postprocess the results from the database so that the output is just a vector of procedure names
+    postProcess(dbResults, results);
+}
+
 // method to get all the procedures from the database
 void Database::getProcedures(vector<string>& results){
     // clear the existing results
@@ -152,11 +295,6 @@ void Database::getProcedures(vector<string>& results){
 
     // postprocess the results from the database so that the output is just a vector of procedure names
     postProcess(dbResults, results);
-//    for (vector<string> dbRow : dbResults) {
-//        string result;
-//        result = dbRow.at(0);
-//        results.push_back(result);
-//    }
 }
 
 // method to get all the variables from the database
@@ -171,12 +309,6 @@ void Database::getVariables(vector<string>& results) {
 
     // postprocess the results from the database so that the output is just a vector
     postProcess(dbResults, results);
-//    for (vector<string> dbRow : dbResults) {
-//        string result;
-//        result = dbRow.at(0);
-//        results.push_back(result);
-//
-//    }
 }
 
 // method to get all the constants values from the database
@@ -191,11 +323,6 @@ void Database::getConstants(vector<string>& results) {
 
     // postprocess the results from the database so that the output is just a vector
     postProcess(dbResults, results);
-//    for (vector<string> dbRow : dbResults) {
-//        string result;
-//        result = dbRow.at(0);
-//        results.push_back(result);
-//    }
 }
 
 // method to get all the assignment statements from the database
@@ -210,11 +337,6 @@ void Database::getAssignments(vector<string>& results) {
 
     // postprocess the results from the database so that the output is just a vector
     postProcess(dbResults, results);
-//    for (vector<string> dbRow : dbResults) {
-//        string result;
-//        result = dbRow.at(0);
-//        results.push_back(result);
-//    }
 }
 
 // method to get all the statements from the database
@@ -229,11 +351,6 @@ void Database::getStatements(vector<string>& results) {
 
     // postprocess the results from the database so that the output is just a vector
     postProcess(dbResults, results);
-//    for (vector<string> dbRow : dbResults) {
-//        string result;
-//        result = dbRow.at(0);
-//        results.push_back(result);
-//    }
 }
 
 // method to get all the read lines from the database
@@ -248,11 +365,6 @@ void Database::getReads(vector<string>& results) {
 
     // postprocess the results from the database so that the output is just a vector
     postProcess(dbResults, results);
-//    for (vector<string> dbRow : dbResults) {
-//        string result;
-//        result = dbRow.at(0);
-//        results.push_back(result);
-//    }
 }
 
 // method to get all the print statements from the database
@@ -267,11 +379,6 @@ void Database::getPrints(vector<string>& results) {
 
     // postprocess the results from the database so that the output is just a vector
     postProcess(dbResults, results);
-//    for (vector<string> dbRow : dbResults) {
-//        string result;
-//        result = dbRow.at(0);
-//        results.push_back(result);
-//    }
 }
 
 // callback method to put one row of results from the database into the dbResults vector
