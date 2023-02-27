@@ -19,12 +19,13 @@ public:
 	void parser(list<string> tokens);
 
 	// methods to evaluate/parse tokens for database
-	void parseProcedure(string option);						// 1: Check for procedure	(iter 1)
-	void parseStatement();									// 2: Check for statement	(iter 1)
-	void parseVariable();									// 2A: Process variable		(iter 1)
-	void parseAssignment();									// 3: Process Assignment	(iter 1)
-	void parseAssignee(string lhs, string rhs);				// 3A: Process Assignments	(iter 1)
-	void parseWhile();										// 4A. Process While loop	(iter 2)
+	void parseProcedure(string option);						// Check for procedure	(iter 1)
+	void parseStatement(string additional);		// Check for statement	(iter 1)
+	void parseVariable(string value);						// Process variable		(iter 1)
+	void parseAssignment();									// Process Assignment	(iter 1)
+	void parseAssignee(string lhs, string rhs);				// Process Assignments	(iter 1)
+	void parseWhile();										// Process While loop	(iter 2)
+	void parseIf(string option);							// Process If loop		(iter 2)
 
 	// Main Supporting methods
 	void processIdx(string option, string lhs, string rhs);
@@ -49,7 +50,7 @@ public:
 	// Procedures Supporting methods
 
 	// Uses Supporting methods
-	void useProcessor(string LineIdx);
+	void useProcessor(string LineIdx, string used);
 
 	// Modifies Supporting methods
 	void modifyProcessor(string LineIdx, string assigned);

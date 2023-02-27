@@ -19,12 +19,20 @@ public:
     /// postprocess result ///
     static void postProcess(vector<vector<string>> & dbResults, vector<string>& results );
 
-    /// iter 2: while ///
-    // method to insert a while into the database
-    static void insertWhile(string whileName);
+    /// iter 2: Parent ///
+    // method to insert a parent into the database
+    static void insertParent(string type, string parentLine, string childLine);
 
-    // method to get all the while lines from the database
-    static void getWhile(vector<string>& results);
+    // method to get all the parents from the database
+    static void getParents(vector<string>& results);
+
+
+    /// iter 2: Parent* ///
+    // method to insert a parents* into the database
+    static void insertParentStar(string type, string parentLine, string childLine);
+
+    // method to get all the parent* from the database
+    static void getParentStars(vector<string>& results);
     
 
     /// procedure ///
@@ -45,8 +53,7 @@ public:
 
     /// constant ///
     // method to insert a constant into the database
-    // Error with creating constant table with [name, value] pair column as of 30 Jan 2023
-    static void insertConstant(string constantName, string constantValue);
+    static void insertConstant(string constantValue);
 
     // method to get all the constant values from the database
     static void getConstants(vector<string>& results);
@@ -86,7 +93,7 @@ public:
 
     /// pattern ///
     // method to insert a pattern into the database
-    static void insertPattern(string aLineIdx, string lhs, string rhs);
+    static void insertPattern(string patternLine, string lhs, string rhs);
 
     // method to get all the patterns from the database
     static void getPatterns(vector<string>& results);
@@ -142,11 +149,14 @@ public:
         - if: if using container statement that modifies variable
         - while: while using container statement that modifies variable
     */
-    static void insertModifies(string useLine, string assigner, string assigned, string type);
+    static void insertModifies(string modifyLine, string modifier, string modified, string type);
 
     // method to get all the modifies (assigner, assigned, type) from the database
     static void getModifies(vector<string>& results);
 
+
+    /// [Experimental] Main Dataset ///
+    static void insertMain(string Idx, string type, string procedure, string variable, string lhs, string rhs);
 
 private:
     // the connection pointer to the database

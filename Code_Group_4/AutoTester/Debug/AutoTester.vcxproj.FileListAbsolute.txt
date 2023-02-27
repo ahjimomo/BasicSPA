@@ -1,0 +1,2 @@
+C:\Users\User\Desktop\Nicky\NUS\TIC2003 Software Development Project\workspace\BasicSPA\Code_Group_4\Debug\AutoTester.exe.lastcodeanalysissucceeded
+C:\Users\User\Desktop\Nicky\NUS\TIC2003 Software Development Project\workspace\BasicSPA\Code_Group_4\AutoTester\Debug\NativeCodeAnalysis.read.1.tlog

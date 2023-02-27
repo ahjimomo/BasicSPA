@@ -1,0 +1,92 @@
+{
+  "version": "2.1.0",
+  "$schema": "https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0-rtm.5.json",
+  "runs": [
+    {
+      "results": [],
+      "tool": {
+        "driver": {
+          "name": "PREfast",
+          "fullName": "PREfast Code Analysis",
+          "version": "14.29.30147.0",
+          "informationUri": "https://aka.ms/cpp/ca"
+        }
+      },
+      "invocations": [
+        {
+          "commandLine": "\"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX86\\x86\\c1xx.dll\" -ACf{1F7B090C-16DB-4822-966A-A93D26ED4681} -ACpmspft140.dll -Alint -D_PREFAST_ -D_AST_FE_ -Analyze -zm0x00EAD1C0 -il C:\\Users\\User\\AppData\\Local\\Temp\\_CL_da3efefcast -typedil -f source\\TestWrapper.cpp -Ze -D_MSC_EXTENSIONS -Zp8 -Gs -pc \\:/ -D_MSC_VER=1929 -D_MSC_FULL_VER=192930147 -D_MSC_BUILD=0 -D_WIN32 -D_M_IX86=600 -D_M_IX86_FP=2 -GR -D_CPPRTTI -I C:\\Users\\User\\Desktop\\Nicky\\NUS\\TIC2003 Software Development Project\\workspace\\BasicSPA\\Code_Group_4\\source -nologo -W 3 -diagnostics:column -Ot -DCODE_ANALYSIS -DWIN32 -D_DEBUG -D_CONSOLE -D_UNICODE -DUNICODE -EHs -D_CPPUNWIND -EHc -D__MSVC_RUNTIME_CHECKS -RTCs -RTCu -MDd -D_DEBUG -D_MT -D_DLL -GS -D_M_FP_PRECISE -Zc:wchar_t -Zc:forScope -FoDebug\\TestWrapper.obj -FdDebug\\vc142.pdb -external:W 3 -Gd -analyze:projectdirectory C:\\Users\\User\\Desktop\\Nicky\\NUS\\TIC2003 Software Development Project\\workspace\\BasicSPA\\Code_Group_4\\AutoTester -analyze:rulesetdirectory ;C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\Team Tools\\Static Analysis Tools\\\\Rule Sets; -analyze:ruleset C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\Team Tools\\Static Analysis Tools\\Rule Sets\\NativeRecommendedRules.ruleset -analyze:quiet -analyze:plugin C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX86\\x86\\EspXEngine.dll -FC -errorreport:prompt -I C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\include -I C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\atlmfc\\include -I C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Auxiliary\\VS\\include -I C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.19041.0\\ucrt -I C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Auxiliary\\VS\\UnitTest\\include -I C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.19041.0\\um -I C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.19041.0\\shared -I C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.19041.0\\winrt -I C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.19041.0\\cppwinrt -I C:\\Users\\User\\Desktop\\Nicky\\NUS\\TIC2003 Software Development Project\\workspace\\BasicSPA\\Code_Group_4\\AutoTester\\Include\\um -external:I C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\include -I C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\include -external:I C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\atlmfc\\include -I C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\atlmfc\\include -external:I C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Auxiliary\\VS\\include -I C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Auxiliary\\VS\\include -external:I C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.19041.0\\ucrt -I C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.19041.0\\ucrt -external:I C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Auxiliary\\VS\\UnitTest\\include -I C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Auxiliary\\VS\\UnitTest\\include -external:I C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.19041.0\\um -I C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.19041.0\\um -external:I C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.19041.0\\shared -I C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.19041.0\\shared -external:I C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.19041.0\\winrt -I C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.19041.0\\winrt -external:I C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.19041.0\\cppwinrt -I C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.19041.0\\cppwinrt -external:I C:\\Users\\User\\Desktop\\Nicky\\NUS\\TIC2003 Software Development Project\\workspace\\BasicSPA\\Code_Group_4\\AutoTester\\Include\\um -I C:\\Users\\User\\Desktop\\Nicky\\NUS\\TIC2003 Software Development Project\\workspace\\BasicSPA\\Code_Group_4\\AutoTester\\Include\\um",
+          "executionSuccessful": true
+        }
+      ],
+      "artifacts": [
+        {
+          "location": {
+            "uri": "file:///c:/users/user/desktop/nicky/nus/tic2003 software development project/workspace/basicspa/code_group_4/autotester/source/testwrapper.cpp"
+          },
+          "roles": [
+            "analysisTarget"
+          ],
+          "hashes": {
+            "md5": "87474b46df94404be2c1ef0ce4ac9d47"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/user/desktop/nicky/nus/tic2003 software development project/workspace/basicspa/code_group_4/autotester/source/testwrapper.h"
+          },
+          "hashes": {
+            "md5": "164481ae8abe5182a33dfad90d25c695"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/user/desktop/nicky/nus/tic2003 software development project/workspace/basicspa/code_group_4/autotester/source/abstractwrapper.h"
+          },
+          "hashes": {
+            "md5": "ce7c7f5bdd9989e6cb237b27253011c4"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/user/desktop/nicky/nus/tic2003 software development project/workspace/basicspa/code_group_4/source/sourceprocessor.h"
+          },
+          "hashes": {
+            "md5": "1b410071d396d4d343900499822644ff"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/user/desktop/nicky/nus/tic2003 software development project/workspace/basicspa/code_group_4/source/database.h"
+          },
+          "hashes": {
+            "md5": "74056b15a96982d9950fe9604e9e530f"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/user/desktop/nicky/nus/tic2003 software development project/workspace/basicspa/code_group_4/source/sqlite3.h"
+          },
+          "hashes": {
+            "md5": "020a9760b0fa9bf7c929abacc660776f"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/user/desktop/nicky/nus/tic2003 software development project/workspace/basicspa/code_group_4/source/tokenizer.h"
+          },
+          "hashes": {
+            "md5": "2c20d57e64aec2604fc827c5783f20ce"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/user/desktop/nicky/nus/tic2003 software development project/workspace/basicspa/code_group_4/source/queryprocessor.h"
+          },
+          "hashes": {
+            "md5": "b9ee339747e623dc8b41c29a82d273f7"
+          }
+        }
+      ]
+    }
+  ]
+}

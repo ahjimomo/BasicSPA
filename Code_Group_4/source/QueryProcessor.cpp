@@ -37,7 +37,7 @@ void QueryProcessor::evaluate(string query, vector<string>& output) {
 	// This logic is highly simplified based on iteration 1 requirements and 
 	// the assumption that the queries are valid.
     int i = 0;
-    while (i < tokens.size()){
+    while (i < tokens.size()) {
         string synonymType = tokens.at(i);
 
         if (synonymType == "procedure")
@@ -60,6 +60,9 @@ void QueryProcessor::evaluate(string query, vector<string>& output) {
 
         if (synonymType == "print")
             Database::getPrints(databaseResults);
+
+        if (synonymType == "while")
+            Database::getParents(databaseResults);
 
         i++;
     }

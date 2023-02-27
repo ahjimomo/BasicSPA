@@ -1,0 +1,15 @@
+procedure woolala { 
+    num2 = num1;
+	num3 = 10;
+	num2 = num3;
+    index = 0;
+	read index;
+
+    print num1;
+    print index;
+	print num2;
+	
+	while (y < z) {
+	print x;
+	read iter2; }
+}
