@@ -146,6 +146,24 @@ void Database::initialize() {
     string createMainTable = "CREATE TABLE mains ( Idx VARCHAR(255) PRIMARY KEY, type VARCHAR(255), procedure VARCHAR(255), variable VARCHAR(255), lhs VARCHAR(255), rhs VARCHAR(255));";
     sqlite3_exec(dbConnection, createMainTable.c_str(), NULL, 0, &errorMessage);
 
+    /// Next ///
+    // drop the existing nexts table (if any)
+    string dropNextsTableSQL = "DROP TABLE IF EXISTS nexts";
+    sqlite3_exec(dbConnection, dropNextsTableSQL.c_str(), NULL, 0, &errorMessage);
+
+    // create a nexts table
+    string createNextsTable = "CREATE TABLE nexts ( prevLine VARCHAR(255), nextLine VARCHAR(255));";
+    sqlite3_exec(dbConnection, createNextsTable.c_str(), NULL, 0, &errorMessage);
+
+    /// Next* ///
+    // drop the existing nextstars table (if any)
+    string dropNextStarsTableSQL = "DROP TABLE IF EXISTS nextstars";
+    sqlite3_exec(dbConnection, dropNextStarsTableSQL.c_str(), NULL, 0, &errorMessage);
+
+    // create a nextstars table
+    string createNextStarsTable = "CREATE TABLE nextstars ( prevLine VARCHAR(255), nextLine VARCHAR(255));";
+    sqlite3_exec(dbConnection, createNextStarsTable.c_str(), NULL, 0, &errorMessage);
+
     // initialize the result vector
     dbResults = vector<vector<string>>();
 }
@@ -160,6 +178,12 @@ void Database::close() {
 void Database::insertMain(string Idx, string type, string procedure, string variable, string lhs, string rhs) {
     string insertMainSQL = "INSERT INTO mains ('Idx', 'type', 'procedure', 'variable', 'lhs', 'rhs') VALUES ('" + Idx + "', '" + type + "', '" + procedure + "', '" + variable + "', '" + lhs + "', '" + rhs + "');";
     sqlite3_exec(dbConnection, insertMainSQL.c_str(), NULL, 0, &errorMessage);
+}
+
+// method to insert an next into the database
+void Database::insertNext(string prevLine, string nextLine) {
+    string insertNextSQL = "INSERT INTO nexts ('prevLine' , 'nextLine') VALUES ('" + prevLine + "' , '" + nextLine + "');";
+    sqlite3_exec(dbConnection, insertNextSQL.c_str(), NULL, 0, &errorMessage);
 }
 
 // method to insert a procedure into the database
@@ -242,7 +266,7 @@ void Database::insertCall(string callLine, string precedence, string calledP) {
 
 // iter 2: method to insert a modify into the database
 void Database::insertModifies(string modifyLine, string modifier, string modified, string type) {
-    string insertModifiesSQL = "INSERT INTO calls ('modifyLine' , 'modifier' , 'modified', 'type') VALUES ('" + modifyLine + "' , '" + modifier + "' , '" + modified + "', '" + type + "');";
+    string insertModifiesSQL = "INSERT INTO modifies ('modifyLine' , 'modifier' , 'modified', 'type') VALUES ('" + modifyLine + "' , '" + modifier + "' , '" + modified + "', '" + type + "');";
     sqlite3_exec(dbConnection, insertModifiesSQL.c_str(), NULL, 0, &errorMessage);
 }
 
@@ -256,7 +280,21 @@ void Database::postProcess( vector<vector<string>>& dbResults, vector<string>& r
 }
 
 ///// Get /////
-// iter 2: method to get all the calls (1 preceding procedure only) from the database
+// iter 2: method to get all the nexts (1 preceding line only) from the database
+void Database::getNexts(vector<string>& results) {
+    // clear the existing results
+    dbResults.clear();
+
+    // retrieve the (preceding line, current line) from the calls table
+    // The callback method is only used when there are results to be returned.
+    string getNextsSQL = "SELECT * FROM nexts;";
+    sqlite3_exec(dbConnection, getNextsSQL.c_str(), callback, 0, &errorMessage);
+
+    // postprocess the results from the database so that the output is just a vector of procedure names
+    postProcess(dbResults, results);
+}
+
+// iter 2: method to get all the calls (1 preceding line only) from the database
 void Database::getModifies(vector<string>& results) {
     // clear the existing results
     dbResults.clear();
@@ -303,7 +341,7 @@ void Database::getUses(vector<string>& results) {
     // clear the existing results
     dbResults.clear();
 
-    // retrieve the procedures from the whiles table
+    // retrieve the lines from the udrds table
     // The callback method is only used when there are results to be returned.
     string getUsesSQL = "SELECT user, used, type FROM uses;";
     sqlite3_exec(dbConnection, getUsesSQL.c_str(), callback, 0, &errorMessage);
@@ -317,7 +355,7 @@ void Database::getPatterns(vector<string>& results) {
     // clear the existing results
     dbResults.clear();
 
-    // retrieve the procedures from the whiles table
+    // retrieve the lhs, rhs from the patterns table
     // The callback method is only used when there are results to be returned.
     string getPatternsSQL = "SELECT lhs, rhs FROM patterns;";
     sqlite3_exec(dbConnection, getPatternsSQL.c_str(), callback, 0, &errorMessage);

@@ -19,6 +19,13 @@ public:
     /// postprocess result ///
     static void postProcess(vector<vector<string>> & dbResults, vector<string>& results );
 
+    /// iter 2: Next ///
+    // method to insert a next into the database
+    static void insertNext(string prevLine, string nextLine);
+
+    // method to get all the next from the database
+    static void getNexts(vector<string>& results);
+
     /// iter 2: Parent ///
     // method to insert a parent into the database
     static void insertParent(string type, string parentLine, string childLine);

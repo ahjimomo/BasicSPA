@@ -175,7 +175,7 @@ void SourceProcessor::parseStatement(string additional = "Default")
 			parseVariable(TokensList.front());
 
 			// Process the print line index & uses in DB
-			processIdx("print", "None", "None");
+			processIdx("print", "None", TokensList.front());
 
 			// Next element should be a ";" assignment
 			next_token();
@@ -190,7 +190,7 @@ void SourceProcessor::parseStatement(string additional = "Default")
 			parseVariable(TokensList.front());
 
 			// Process read line index
-			processIdx("read", "None", "None");
+			processIdx("read", TokensList.front(), "None");
 
 			// Next element shoud be a ";" for assignment
 			next_token();
@@ -201,24 +201,21 @@ void SourceProcessor::parseStatement(string additional = "Default")
 		else if (TokensList.front() == "while")
 		{
 			// Update the index of while function called & update DB
+			next_token();
 			parseWhile();
 
-			// Next element should be a 'then' or '{' to finish move into statement
+			// Next element should be a '{' to finish move into statement
 			next_token();
-			if (TokensList.front() == "then")
-			{
-				expectedSymbol("then");
-				curLineIdx++;
-			}
-			else
-			{
-				expectedSymbol("{");
-				curLineIdx++;
-			}
+			expectedSymbol("{");
+			curLineIdx++;
 
 			// Activate the 'while-flag'
 			w_flag = 1;
+
+			// parse statement to end with "}"
 			parseStatement();
+			expectedSymbol("}");
+			curLineIdx--;
 
 			// Reset the 'while-flag'
 			w_flag = 0;
@@ -236,35 +233,36 @@ void SourceProcessor::parseStatement(string additional = "Default")
 		{
 			// Parse if & update if_flag
 			i_flag = 1;
+			next_token();
 			parseIf("if");
 
-			// Next element should be a 'then' or '{' to finish move into statement
+			// Next element should be a 'then {' to finish move into statement
 			next_token();
-			if (TokensList.front() == "then")
-			{
-				expectedSymbol("then");
-				curLineIdx++;
-			}
-			else
-			{
-				expectedSymbol("{");
-				curLineIdx++;
-			}
+			expectedSymbol("then");
+			expectedSymbol("{");
+			curLineIdx++;
 
 			// Process the if-statement
 			parseStatement();
+			expectedSymbol("}");
+			curLineIdx--;
 
 			// Reset if flag
 			i_flag = 0;
-			
-			// process the else-statement if any
-			if (e_flag == 1)
-			{
-				curLineIdx--; // Drop by 1 index count for "} else {" line
-				parseStatement();
-			}
+		}
+		// 6. iter 2: Check if it's an else statement
+		else if (TokensList.front() == "else")
+		{
+			// Update e_flag & Line else since 'else' is not counted
+			e_flag = 1;
+			expectedSymbol("else");
+			expectedSymbol("{");
 
-			// reset else flag
+			parseStatement();
+			expectedSymbol("}");
+			curLineIdx--;
+
+			// reset e_flag
 			e_flag = 0;
 		}
 		// else if it's none of the above methods, it should be a direct assignment 
@@ -353,7 +351,7 @@ void SourceProcessor::parseContainer(string option)
 	// Parse and work on inner container statement
 	while (c_flag == 1)
 	{
-		// [Break Check] Check if b_flag = 0, lr_flag = 2 & current token is a ")"
+		// [Break Check] Check if b_flag = 0, lr_flag = 2 & current token is a ")" [ie. x > (x + 2)]
 		if (b_flag == 0 && lr_flag == 2 && TokensList.front() == ")")
 		{
 			// Reset container & lr flag to 0, and break while-loop
@@ -361,9 +359,8 @@ void SourceProcessor::parseContainer(string option)
 			lr_flag = 0;
 			break;
 		}
-
-		// 1. Check if it's a start of contained statement
-		if (TokensList.front() == "(")
+		// 1. Check if it's a start of another contained statement
+		else if (TokensList.front() == "(")
 		{
 			// Update local values
 			b_flag++;
@@ -418,7 +415,15 @@ void SourceProcessor::parseContainer(string option)
 
 			// Update variable in DB
 			parseVariable(TokensList.front());
-			processIdx("cStatement", TokensList.front(), TokensList.front());
+			if (option == "while")
+			{
+				processIdx("cStatement", "while", TokensList.front());
+			}
+			else if (option == "if")
+			{
+				processIdx("cStatement", "if", TokensList.front());
+			}
+
 
 			next_token();
 		}
@@ -500,11 +505,19 @@ void SourceProcessor::parseAssignment()
 
 			rhs = TokensList.front(); // Will be overwritten if assignee is a term and not a single value
 			next_token();
+
+			// If it's a single value assignee
+			if (TokensList.front() == ";" && patternFullList.size() == 1)
+			{
+				parseAssignee(lhs, rhs);
+			}
 		}
-		// Get full string of term to overwrite incorrect rhs value
+		// Get full string of term to overwrite incorrect rhs value and process rhs
 		if (patternFullList.size() > 1)
 		{
 			rhs = expandListString(patternFullList);
+			// Process the assignee
+			parseAssignee(lhs, rhs);
 		}
 
 		// Update assignment table in DB
@@ -531,33 +544,33 @@ void SourceProcessor::parseAssignee(string lhs, string rhs)
 	if (patternFullList.size() == 1)
 	{
 		// Check if assignment is an integer value
-		if (checkNum(TokensList.front()) == true)
+		if (checkNum(rhs) == true)
 		{
-			string val = parseConstant("value");
+			//string val = parseConstant("value");
 
 			// Insert constant-value pair to constants table
-			Database::insertConstant(val);
+			Database::insertConstant(rhs);
 
 			// Update cval on key-pair value - iter 2 > Useless, for fun only.
-			updateConstantMap(lhs, val);
+			updateConstantMap(lhs, rhs);
 		}
 		// if asignee is a variable, get variable existing value
-		else if (checkName(TokensList.front()) == true)
+		else if (checkName(rhs) == true)
 		{
 			// Insert into use & modifies table since value is a variable
-			processIdx("assignment", lhs, rhs);
+			//processIdx("assignment", lhs, rhs);
 			parseVariable(rhs);
 
-			string val = parseConstant("name");
+			//string val = parseConstant("name");
 
 			// Insert constant-value pair to constants table if there is an existing value from the variable else skip
-			if (val != "none")
-			{
-				Database::insertConstant(val);
+			//if (val != "none")
+			//{
+			//	Database::insertConstant(val);
 
-				// Update cval on key-pair value(s) - iter 2 > Useless, for fun only.
-				updateConstantMap(lhs, val);
-			}
+			//	// Update cval on key-pair value(s) - iter 2 > Useless, for fun only.
+			//	updateConstantMap(lhs, val);
+			//}
 		}
 	}
 	// 2. If it's a full string, iterate through each value in list to process them
@@ -569,18 +582,18 @@ void SourceProcessor::parseAssignee(string lhs, string rhs)
 			if (checkNum(item) == true)
 			{
 				//Database::insertConstant(lhs, item);
-				std::cout << "Hello World!"; // Don't think it's required as discussed as of 26 Feb 2023 (Iter 2)
+				Database::insertConstant(item); // Don't think it's required as discussed as of 26 Feb 2023 (Iter 2)
 			}
 			// if item is a operator, <iter 3>
 			else if (checkOperator(item) == true)
 			{
-				std::cout << "Hello World!";
+				continue;
 			}
 			// if item is a variable, create record
 			else if (checkName(item) == true)
 			{
 				Database::insertVariable(item);
-				//processIdx("assignment", lhs, item);
+				processIdx("assignment", lhs, item);
 			}
 		}
 	}
@@ -600,7 +613,7 @@ void SourceProcessor::processIdx(string option, string lhs = "None", string rhs 
 	if (option == "print")
 	{
 		Database::insertPrint(saveLineIdx);
-		Database::insertUse(saveLineIdx, saveLineIdx, rhs, "print");
+		Database::insertUse(saveLineIdx, "print", rhs, "print");
 		Database::insertUse(saveLineIdx, curProd, rhs, "procedure");
 		useProcessor(saveLineIdx, rhs);
 
@@ -611,7 +624,7 @@ void SourceProcessor::processIdx(string option, string lhs = "None", string rhs 
 	else if (option == "read")
 	{
 		Database::insertRead(saveLineIdx);
-		Database::insertModifies(saveLineIdx, saveLineIdx, lhs, "read");
+		Database::insertModifies(saveLineIdx, "read", lhs, "read");
 		Database::insertModifies(saveLineIdx, curProd, lhs, "procedure");
 		modifyProcessor(saveLineIdx, lhs);
 
@@ -625,9 +638,9 @@ void SourceProcessor::processIdx(string option, string lhs = "None", string rhs 
 	}
 	else if (option == "assignment")
 	{
-		Database::insertUse(intToStr(curLineIdx), intToStr(curLineIdx), rhs, "assignment");
+		Database::insertUse(intToStr(curLineIdx), lhs, rhs, "assignment");
+		Database::insertModifies(intToStr(curLineIdx), rhs, lhs, "assignment");
 		useProcessor(saveLineIdx, rhs);
-		Database::insertModifies(intToStr(curLineIdx), intToStr(curLineIdx), lhs, "assignment");
 		modifyProcessor(saveLineIdx, lhs);
 
 		// Experiment push for assignment
@@ -635,10 +648,10 @@ void SourceProcessor::processIdx(string option, string lhs = "None", string rhs 
 	}
 	else if (option == "cStatement")
 	{
-		Database::insertModifies(saveLineIdx, saveLineIdx, rhs, "cStatement");
+		Database::insertModifies(saveLineIdx, lhs, rhs, "cStatement");
 		Database::insertModifies(saveLineIdx, curProd, rhs, "procedure");
 		useProcessor(saveLineIdx, rhs);
-		Database::insertUse(saveLineIdx, saveLineIdx, lhs, "cStatement");
+		Database::insertUse(saveLineIdx, rhs, lhs, "cStatement");
 		Database::insertUse(saveLineIdx, curProd, lhs, "procedure");
 		modifyProcessor(saveLineIdx, lhs);
 	}
@@ -734,11 +747,21 @@ string SourceProcessor::expandListString(list<string> toExpand)
 	// Expand list into string and return values
 	string delim = " ";
 	string expanded;
+	int lenString = toExpand.size();
 
 	// Iterate through list and concatenate words
 	for (string word : toExpand)
 	{
-		expanded = expanded + word;
+		lenString--;
+
+		if (lenString != 0)
+		{
+			expanded = expanded + word + delim;
+		}
+		else
+		{
+			expanded = expanded + word;
+		}
 	}
 	return expanded;
 }

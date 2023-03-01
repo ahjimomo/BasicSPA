@@ -1,15 +1,25 @@
-procedure woolala { 
+procedure dancedanceEvo { 
     num2 = num1;
 	num3 = 10;
-	num2 = num3;
+	print h;
+	num2 = num3 + x;
     index = 0;
 	read index;
-
-    print num1;
-    print index;
-	print num2;
 	
 	while (y < z) {
 	print x;
-	read iter2; }
+	read iter2;
+	}
+	
+	print num1;
+    print index;
+	print num2;
+	
+	if (g > (2 + k)) then {
+	print g;
+	} else {
+	print k;
+	}
+	
+	read j;
 }
