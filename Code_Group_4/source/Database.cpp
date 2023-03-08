@@ -270,7 +270,7 @@ void Database::insertModifies(string modifyLine, string modifier, string modifie
     sqlite3_exec(dbConnection, insertModifiesSQL.c_str(), NULL, 0, &errorMessage);
 }
 
-///// PostProcess Result /////
+///// Supprting: PostProcess Result /////
 void Database::postProcess( vector<vector<string>>& dbResults, vector<string>& results ) {
     for (vector<string> dbRow : dbResults) {
         string result;
@@ -279,8 +279,56 @@ void Database::postProcess( vector<vector<string>>& dbResults, vector<string>& r
     }
 }
 
+// callback method to put one row of results from the database into the dbResults vector
+// This method is called each time a row of results is returned from the database
+int Database::callback(void* NotUsed, int argc, char** argv, char** azColName) {
+    NotUsed = 0;
+    vector<string> dbRow;
+
+    // argc is the number of columns for this row of results
+    // argv contains the values for the columns
+    // Each value is pushed into a vector.
+    for (int i = 0; i < argc; i++) {
+        dbRow.push_back(argv[i]);
+    }
+
+    // The row is pushed to the vector for storing all rows of results
+    dbResults.push_back(dbRow);
+
+    return 0;
+}
+
+
 ///// Get /////
-// iter 2: method to get all the nexts (1 preceding line only) from the database
+// iter 2: method to get ifs the parent Whiles
+void Database::getIfs(vector<string>& results) {
+    // clear the existing results
+    dbResults.clear();
+
+    // retrieve the (preceding line, current line) from the calls table
+    // The callback method is only used when there are results to be returned.
+    string getIfsSQL = "SELECT DISTINCT(parentLine) FROM parents WHERE type = 'if';";
+    sqlite3_exec(dbConnection, getIfsSQL.c_str(), callback, 0, &errorMessage);
+
+    // postprocess the results from the database so that the output is just a vector of procedure names
+    postProcess(dbResults, results);
+}
+
+// iter 2: method to get all the parent Whiles
+void Database::getWhiles(vector<string>& results) {
+    // clear the existing results
+    dbResults.clear();
+
+    // retrieve the (preceding line, current line) from the calls table
+    // The callback method is only used when there are results to be returned.
+    string getWhilesSQL = "SELECT DISTINCT(parentLine) FROM parents WHERE type = 'while';";
+    sqlite3_exec(dbConnection, getWhilesSQL.c_str(), callback, 0, &errorMessage);
+
+    // postprocess the results from the database so that the output is just a vector of procedure names
+    postProcess(dbResults, results);
+}
+
+
 void Database::getNexts(vector<string>& results) {
     // clear the existing results
     dbResults.clear();
@@ -364,7 +412,7 @@ void Database::getPatterns(vector<string>& results) {
     postProcess(dbResults, results);
 }
 
-// iter 2: method to get all the while statements from the database
+// iter 2: method to get all the parents* statements from the database
 void Database::getParentStars(vector<string>& results) {
     // clear the existing results
     dbResults.clear();
@@ -378,7 +426,7 @@ void Database::getParentStars(vector<string>& results) {
     postProcess(dbResults, results);
 }
 
-// iter 2: method to get all the while statements from the database
+// iter 2: method to get all the parents statements from the database
 void Database::getParents(vector<string>& results) {
     // clear the existing results
     dbResults.clear();
@@ -490,22 +538,3 @@ void Database::getPrints(vector<string>& results) {
     postProcess(dbResults, results);
 }
 
-
-// callback method to put one row of results from the database into the dbResults vector
-// This method is called each time a row of results is returned from the database
-int Database::callback(void* NotUsed, int argc, char** argv, char** azColName) {
-    NotUsed = 0;
-    vector<string> dbRow;
-
-    // argc is the number of columns for this row of results
-    // argv contains the values for the columns
-    // Each value is pushed into a vector.
-    for (int i = 0; i < argc; i++) {
-        dbRow.push_back(argv[i]);
-    }
-
-    // The row is pushed to the vector for storing all rows of results
-    dbResults.push_back(dbRow);
-
-    return 0;
-}

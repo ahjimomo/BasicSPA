@@ -1,15 +1,4 @@
-﻿  SourceProcessor.cpp
-C:\Users\User\Desktop\Nicky\NUS\TIC2003 Software Development Project\workspace\BasicSPA\Code_Group_4\source\SourceProcessor.cpp(33,11): warning C4018: '<': signed/unsigned mismatch
-C:\Users\User\Desktop\Nicky\NUS\TIC2003 Software Development Project\workspace\BasicSPA\Code_Group_4\source\SourceProcessor.cpp(87,32): warning C4101: 'e': unreferenced local variable
-C:\Users\User\Desktop\Nicky\NUS\TIC2003 Software Development Project\workspace\BasicSPA\Code_Group_4\source\SourceProcessor.cpp(734,34): warning C4129: '+': unrecognized character escape sequence
-C:\Users\User\Desktop\Nicky\NUS\TIC2003 Software Development Project\workspace\BasicSPA\Code_Group_4\source\SourceProcessor.cpp(734,34): warning C4129: '-': unrecognized character escape sequence
-C:\Users\User\Desktop\Nicky\NUS\TIC2003 Software Development Project\workspace\BasicSPA\Code_Group_4\source\SourceProcessor.cpp(734,34): warning C4129: '/': unrecognized character escape sequence
-C:\Users\User\Desktop\Nicky\NUS\TIC2003 Software Development Project\workspace\BasicSPA\Code_Group_4\source\SourceProcessor.cpp(734,34): warning C4129: '%': unrecognized character escape sequence
-C:\Users\User\Desktop\Nicky\NUS\TIC2003 Software Development Project\workspace\BasicSPA\Code_Group_4\source\SourceProcessor.cpp(734,34): warning C4129: '*': unrecognized character escape sequence
-C:\Users\User\Desktop\Nicky\NUS\TIC2003 Software Development Project\workspace\BasicSPA\Code_Group_4\source\SourceProcessor.cpp(741,34): warning C4129: '>': unrecognized character escape sequence
-C:\Users\User\Desktop\Nicky\NUS\TIC2003 Software Development Project\workspace\BasicSPA\Code_Group_4\source\SourceProcessor.cpp(741,34): warning C4129: '<': unrecognized character escape sequence
-C:\Users\User\Desktop\Nicky\NUS\TIC2003 Software Development Project\workspace\BasicSPA\Code_Group_4\source\SourceProcessor.cpp(741,34): warning C4129: '=': unrecognized character escape sequence
-C:\Users\User\Desktop\Nicky\NUS\TIC2003 Software Development Project\workspace\BasicSPA\Code_Group_4\source\SourceProcessor.cpp(741,34): warning C4129: '!': unrecognized character escape sequence
-C:\Users\User\Desktop\Nicky\NUS\TIC2003 Software Development Project\workspace\BasicSPA\Code_Group_4\source\SourceProcessor.cpp(690): warning C4715: 'SourceProcessor::parseConstant': not all control paths return a value
+﻿  QueryProcessor.cpp
+C:\Users\User\Desktop\Nicky\NUS\TIC2003 Software Development Project\workspace\BasicSPA\Code_Group_4\source\QueryProcessor.cpp(56,14): warning C4018: '<': signed/unsigned mismatch
+C:\Users\User\Desktop\Nicky\NUS\TIC2003 Software Development Project\workspace\BasicSPA\Code_Group_4\source\QueryProcessor.cpp(77,23): warning C4018: '<': signed/unsigned mismatch
   SPA.vcxproj -> C:\Users\User\Desktop\Nicky\NUS\TIC2003 Software Development Project\workspace\BasicSPA\Code_Group_4\Debug\SPA.lib
-  Warning: Full debug symbol generation from partial PDBs is not supported for static libraries.

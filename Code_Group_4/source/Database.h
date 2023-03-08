@@ -33,6 +33,12 @@ public:
     // method to get all the parents from the database
     static void getParents(vector<string>& results);
 
+    // method to get all the while's parentLine from the database
+    static void getWhiles(vector<string>& results);
+
+    // method to get all the if's parentLine from the database
+    static void getIfs(vector<string>& results);
+
 
     /// iter 2: Parent* ///
     // method to insert a parents* into the database
@@ -175,7 +181,6 @@ private:
     // callback method to put one row of results from the database into the dbResults vector
     // This method is called each time a row of results is returned from the database
     static int callback(void* NotUsed, int argc, char** argv, char** azColName);
-
 
 };
 
