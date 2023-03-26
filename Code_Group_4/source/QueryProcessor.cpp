@@ -1,5 +1,6 @@
 #include "QueryProcessor.h"
 #include "Tokenizer.h"
+#include "Database.h"
 
 #include <regex>			// C++ regex library for regex expressions
 #include <string>
@@ -23,10 +24,9 @@ QueryProcessor::QueryProcessor() {}
 // destructor
 QueryProcessor::~QueryProcessor() {}
 
-
 ///// Parameters /////
-vector<string> databaseResults;                 // create a vector for storing the results from database
-list<string> output;                          // vector to store final output
+vector<string> databaseResults;                 // initialize a vector for storing the results from database
+vector<string> output;                          // vector to store final output
 vector<string> tempResults;                     // vector storing temp results from database
 
 unordered_map<string, string> elemMap;          // Map storing select and query elem name
@@ -50,14 +50,18 @@ void QueryProcessor::evaluate(string query, vector<string>& output)
     vector<string> tokens;
     tk.tokenize(query, tokens);
 
-    // store individual elements in a list
-    list<string> allTokens;
+    // Sample printing
+    cout << "Query: Did tokens get tokenized?: " << tokens.size() << endl;
 
-    int i = 0;
+    // store individual elements in a list
+    vector<string> allTokens;
+
+    unsigned int i = 0;
     while (i < tokens.size()) {
-        string elements = tokens.at(i);
-        allTokens.push_back(elements);
+        string element = tokens.at(i);
+        allTokens.push_back(element);
         i++;
+
     }
 
     // push elements into extract function
@@ -69,22 +73,23 @@ void QueryProcessor::evaluate(string query, vector<string>& output)
     sComponent.clear();
 
     // store results in output
-    for (string databaseResult : databaseResults)
+    for (string dbResult : databaseResults)
     {
-        output.push_back(databaseResult);
+        output.push_back(dbResult);
     }
 
-    //print results
-    for (int j = 0; j < output.size(); j++)
+    /*//print results
+    for (unsigned int j = 0; j < output.size(); j++)
     {
         cout << "output" << output[j] << endl;
     }
-}
+    */
 
+}
 
 ///// Extractor /////
 // call the method in database to retrieve the results
-void QueryProcessor::extract(list<string> tokens) {
+void QueryProcessor::extract(vector<string> tokens) {
 
     TokensList = tokens;                // Initialize TokensList as our temp tokens list (allTokens)
 
@@ -118,10 +123,31 @@ void QueryProcessor::extract(list<string> tokens) {
                 // Get data type of queried element
                 string qType = getType(TokensList.front());
 
-                querySingle(qType);
+                querySingle(qType, "single");
             }
-            
-            // iterate through 
+            // Case: Multiple select queries (ie. <w1, w2, w3>)
+            if (TokensList.front() == "<")
+            {
+                // Update local tracking lists
+                qFullComponents.push_back(TokensList.front());
+                sComponent.push_back(TokensList.front());
+
+                // Parse into 
+                //parseNestedSelect();
+
+            }
+            // Case: If not of the above, it should be a single variable with additional clause (ie. w1 such that ()..)
+            else
+            {
+                // Get data type of queried element
+                string qType = getType(TokensList.front());
+
+                // Process clause
+                //next_token();
+                //if (TokensList.front() == )
+
+
+            }
             
         }
         // Move to next token
@@ -132,42 +158,59 @@ void QueryProcessor::extract(list<string> tokens) {
 
 ///// Support Methods /////
 // iter 2: Process single variable
-void QueryProcessor::querySingle(string qType)
+void QueryProcessor::querySingle(string qType, string option)
 {
     // 1. constant 
     if (qType == "constant") 
     {
-        Database::getConstants(databaseResults);
+        Database::getConstants(tempResults);
     }
     // 2. assignment
     else if (qType == "assign")
     {
-        Database::getAssignments(databaseResults);
+        Database::getAssignments(tempResults);
     }
     // 3. statements
     else if (qType == "stmt")
     {
-        Database::getStatements(databaseResults);
+        Database::getStatements(tempResults);
+
     }
     // 4. read
     else if (qType == "read")
     {
-        Database::getReads(databaseResults);
+        Database::getReads(tempResults);
     }
     // 5. print
     else if (qType == "print")
     {
-        Database::getPrints(databaseResults);
+        Database::getPrints(tempResults);
     }
     // 6. while
     else if (qType == "while")
     {
-        Database::getWhiles(databaseResults);
+        Database::getWhiles(tempResults);
     }
     // 7. if
     else if (qType == "if")
     {
-        Database::getIfs(databaseResults);
+        Database::getIfs(tempResults, "if", "parentLine", 0);
+    }
+    // 8. Procedure
+    else if (qType == "procedure")
+    {
+        Database::getProcedures(tempResults);
+    }
+    // 9. variable
+    else if (qType == "variable")
+    {
+        Database::getVariables(tempResults);
+    }
+
+    // If single query
+    if (option == "single")
+    {
+        databaseResults = tempResults;
     }
 }
 
@@ -348,7 +391,8 @@ void QueryProcessor::next_token(){
     // Check if all elements has been visited in list(tokens)
     if (TokensList.empty() == false){
         // Remove the current/front element
-        TokensList.pop_front();
+        //TokensList.pop_front();
+        TokensList.erase(TokensList.begin());
     }
 }
 
@@ -371,39 +415,3 @@ void QueryProcessor::expectedSymbol(string symbol)
         std::throw_with_nested(std::runtime_error("Error, expected symbol " + symbol));
     }
 }
-
-// iter 2: Support method to check if 
-
-
-//    int i = 0;
-//    while (i < tokens.size()) {
-//        string synonymType = tokens.at(i);
-//
-//        if (synonymType == "procedure")
-//            Database::getProcedures(databaseResults);
-//
-//        if (synonymType == "variable" )
-//            Database::getVariables(databaseResults);
-//
-//        if (synonymType == "constant")
-//            Database::getConstants(databaseResults);
-//
-//        if (synonymType == "assign")
-//            Database::getAssignments(databaseResults);
-//
-//        if (synonymType == "stmt")
-//            Database::getStatements(databaseResults);
-//
-//        if (synonymType == "read")
-//            Database::getReads(databaseResults);
-//
-//        if (synonymType == "print")
-//            Database::getPrints(databaseResults);
-//
-//        if (synonymType == "while")
-//            Database::getParents(databaseResults);
-//
-//        i++;
-//    }
-
-    //post process the results to fill in the output vector

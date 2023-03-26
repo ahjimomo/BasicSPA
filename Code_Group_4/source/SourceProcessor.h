@@ -6,6 +6,7 @@
 #include "Tokenizer.h"
 
 #include <list>
+#include <vector>
 
 using namespace std;
 
@@ -20,7 +21,7 @@ public:
 
 	// methods to evaluate/parse tokens for database
 	void parseProcedure(string option);						// Check for procedure	(iter 1)
-	void parseStatement(string additional);		// Check for statement	(iter 1)
+	void parseStatement(string additional);					// Check for statement	(iter 1)
 	void parseVariable(string value);						// Process variable		(iter 1)
 	void parseAssignment();									// Process Assignment	(iter 1)
 	void parseAssignee(string lhs, string rhs);				// Process Assignments	(iter 1)

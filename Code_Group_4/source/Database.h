@@ -2,6 +2,9 @@
 
 #include <string>
 #include <vector>
+#include <list>
+#include <sstream>
+#include <fstream>
 #include "sqlite3.h"
 
 using namespace std;
@@ -17,7 +20,7 @@ public:
     static void close();
 
     /// postprocess result ///
-    static void postProcess(vector<vector<string>> & dbResults, vector<string>& results );
+    static void postProcess(vector<vector<string>>& dbResults, vector<string>& results );
 
     /// iter 2: Next ///
     // method to insert a next into the database
@@ -37,7 +40,7 @@ public:
     static void getWhiles(vector<string>& results);
 
     // method to get all the if's parentLine from the database
-    static void getIfs(vector<string>& results);
+    static void getIfs(vector<string>& results, string parentType, string parentOrChild, int specificLine);
 
 
     /// iter 2: Parent* ///
@@ -170,6 +173,11 @@ public:
 
     /// [Experimental] Main Dataset ///
     static void insertMain(string Idx, string type, string procedure, string variable, string lhs, string rhs);
+
+
+    ///  Supporting Method ///
+    // String to Int
+    static string intToStr(int value);
 
 private:
     // the connection pointer to the database

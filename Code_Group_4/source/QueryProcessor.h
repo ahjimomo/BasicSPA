@@ -3,7 +3,9 @@
 #include <string>
 #include <vector>
 #include <list>
+#include <unordered_map>
 #include "Database.h"
+#include "Tokenizer.h"
 
 using namespace std;
 
@@ -16,14 +18,14 @@ public:
 	~QueryProcessor();
 
     // declaring variables
-    list<string> TokensList;
+    vector<string> TokensList;
 
     // method for evaluating a query
 	void evaluate(string query, vector<string>& results);
-    void extract(list<string> tokens);
+    void extract(vector<string> tokens);
 
     // method to evaluate query without pattern or such that clause
-    void querySingle(string qType);
+    void querySingle(string qType, string option);
 
     // Type support methods
     bool checkType(string token);

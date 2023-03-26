@@ -18,4 +18,3 @@ public:
 	// method for tokenizing a program / query string
 	void tokenize(string text, vector<string>& tokens);
 };
-

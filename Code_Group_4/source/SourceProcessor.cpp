@@ -1,4 +1,5 @@
 #include "SourceProcessor.h"
+#include "Database.h"
 
 #include <regex>			// C++ regex library for regex expressions
 #include <list>				// Use of list vs. vector (https://www.educba.com/c-plus-plus-vector-vs-list/)
@@ -6,11 +7,14 @@
 #include <unordered_map>	// Use of map to store constantname and values
 #include <string>
 #include <iterator>
+#include <vector>
 
 #define NUM_EXPR "[0-9]+"
 #define NAME_EXPR "[a-zA-Z]+[0-9]*"
 #define OPERATOR_EXPR "[\+\-\/\%\*]"
 #define COMPARE_EXPR "[\>\<\==\!=]"
+
+using namespace std;
 
 // method for processing the source program
 // This method currently only inserts the procedure name into the database
@@ -26,15 +30,22 @@ void SourceProcessor::process(string program)
 	vector<string> tokens;
 	tk.tokenize(program, tokens);
 
+	// Sample printing
+	cout << "Source: Did tokens get populated?: " << tokens.size() << endl;
+	//cout << "What is program?: " << program << endl;
+
 	// store individual elements in a list
 	list<string> allTokens;
 
-	int i = 0;
+	unsigned int i = 0;
 	while (i < tokens.size())
 	{
 		string elem = tokens.at(i);
 		allTokens.push_back(elem);
 		i++;
+
+		// Sample printing
+		//cout << "SourceTesting: " << elem << endl;
 	}
 
 	// push our tokens into a parser
@@ -81,6 +92,11 @@ void SourceProcessor::parser(list<string> Tokens)
 		try
 		{
 			parseProcedure("root");
+			// End of statement
+			if (TokensList.front() == "}")
+			{
+				next_token();
+			}
 		}
 
 		// Catch and print any errors our code runs into (https://stackoverflow.com/questions/3074646/how-to-catch-unknown-exception-and-print-it)
@@ -110,10 +126,10 @@ void SourceProcessor::parseProcedure(string option)
 		{
 			// insert procedure into database & rest all local procedure list & index
 			Database::insertProcedure(TokensList.front());
-			prodList.push_back(curProd);
 			curProd = TokensList.front();
 			rootProd = TokensList.front();
 			prevProd = TokensList.front();
+			prodList.push_back(curProd);
 
 
 			// Next element should be a "{" symbol for the statement
@@ -788,6 +804,8 @@ void SourceProcessor::next_token()
 	{
 		// Remove the current/front element
 		TokensList.pop_front();
+		// Method for vector
+		//TokensList.erase(TokensList.begin());
 	}
 }
 

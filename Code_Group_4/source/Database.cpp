@@ -1,5 +1,6 @@
 #include "Database.h"
 #include <iostream>
+#include <string>
 
 using namespace std;
 
@@ -271,7 +272,8 @@ void Database::insertModifies(string modifyLine, string modifier, string modifie
 }
 
 ///// Supprting: PostProcess Result /////
-void Database::postProcess( vector<vector<string>>& dbResults, vector<string>& results ) {
+void Database::postProcess(vector<vector<string>>& dbResults, vector<string>& results ) {
+    results.clear();
     for (vector<string> dbRow : dbResults) {
         string result;
         result = dbRow.at(0);
@@ -300,15 +302,28 @@ int Database::callback(void* NotUsed, int argc, char** argv, char** azColName) {
 
 
 ///// Get /////
-// iter 2: method to get ifs the parent Whiles
-void Database::getIfs(vector<string>& results) {
+// iter 2: method to get all the ifs with stipulated line number
+// Arguments:
+//  - string parentType: While/If/Else
+//  - string parentOrChild: "parentLine" OR "childLine"
+//  - int specificLine: 0 for everything and other integer values for specify index
+// Returns:
+//  - 2 columns [type, line index] (ie. [if, 3])
+void Database::getIfs(vector<string>& results, string parentType, string parentOrChild, int specificLine) {
     // clear the existing results
     dbResults.clear();
 
-    // retrieve the (preceding line, current line) from the calls table
-    // The callback method is only used when there are results to be returned.
-    string getIfsSQL = "SELECT DISTINCT(parentLine) FROM parents WHERE type = 'if';";
-    sqlite3_exec(dbConnection, getIfsSQL.c_str(), callback, 0, &errorMessage);
+    if (specificLine == 0)
+    {
+        string getIfsSQL = "SELECT DISTINCT type, CASE " + parentOrChild + " WHEN 'root' THEN 0 ELSE " + parentOrChild + " END " + parentOrChild + " FROM parents WHERE type = " + parentType + ";";
+        sqlite3_exec(dbConnection, getIfsSQL.c_str(), callback, 0, &errorMessage);
+    }
+    else
+    {
+        string stringLine = intToStr(specificLine);
+        string getIfsSQL = "SELECT DISTINCT type, CASE " + parentOrChild + " WHEN 'root' THEN 0 ELSE " + parentOrChild + " END " + parentOrChild + " FROM parents WHERE type = " + parentType + " AND " + parentOrChild + " = " + stringLine + ";";
+        sqlite3_exec(dbConnection, getIfsSQL.c_str(), callback, 0, &errorMessage);
+    }
 
     // postprocess the results from the database so that the output is just a vector of procedure names
     postProcess(dbResults, results);
@@ -538,3 +553,14 @@ void Database::getPrints(vector<string>& results) {
     postProcess(dbResults, results);
 }
 
+// Support Methods
+// iter 2: process integer to string
+string Database::intToStr(int value)
+{
+    string valueInStr;
+    stringstream OriginalInt;
+    OriginalInt << value;
+    OriginalInt >> valueInStr;
+
+    return valueInStr;
+}

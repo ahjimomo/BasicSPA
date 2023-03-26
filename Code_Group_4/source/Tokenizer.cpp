@@ -16,11 +16,11 @@ Tokenizer::~Tokenizer() {}
 void Tokenizer::tokenize(string text, vector<string>& tokens) {
 	tokens.clear();
 	string token;
-	
+
 	unsigned int i = 0;
 	while (i < text.length()) {
 		char ch = text.at(i);
-		
+
 		if (isdigit(ch)) { // scan for a numeric sequence
 			token.push_back(ch);
 			i++;
