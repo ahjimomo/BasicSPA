@@ -29,21 +29,25 @@ public:
     // method to get all the next from the database
     static void getNexts(vector<string>& results);
 
-    /// iter 2: Parent ///
+    /// iter 2: Parents / Parents* ///
     // method to insert a parent into the database
     static void insertParent(string type, string parentLine, string childLine);
 
     // method to get all the parents from the database
     static void getParents(vector<string>& results);
 
+    // iter 2: method to get specific parents line from parents/parents* table
+    static void getPLine(string table, string pType, vector<string>& results);
+
+    // iter 2: method to get specific child lines from parents/parents* table
+    static void getCLine(string table, string pType, vector<string>& results);
+
     // method to get all the while's parentLine from the database
-    static void getWhiles(vector<string>& results);
+    static void getWhiles(vector<string>& results, string parentType, string parentOrChild, string specificLine);
 
     // method to get all the if's parentLine from the database
-    static void getIfs(vector<string>& results, string parentType, string parentOrChild, int specificLine);
+    static void getIfs(vector<string>& results, string parentType, string parentOrChild, string specificLine);
 
-
-    /// iter 2: Parent* ///
     // method to insert a parents* into the database
     static void insertParentStar(string type, string parentLine, string childLine);
 
@@ -61,10 +65,13 @@ public:
 
     /// variable ///
     // method to insert a variable into the database
-    static void insertVariable(string variableName);
+    static void insertVariable(string variableName, string VariableLine);
 
     // method to get all variables from the database
     static void getVariables(vector<string>& results);
+
+    // method to get all variables from the database
+    static void getVariablesIdx(vector<string>& results);
 
 
     /// constant ///
@@ -112,7 +119,7 @@ public:
     static void insertPattern(string patternLine, string lhs, string rhs);
 
     // method to get all the patterns from the database
-    static void getPatterns(vector<string>& results);
+    static void getPatterns(vector<string>& results, string lhs, string rhs);
 
 
     /// uses ///
@@ -170,6 +177,7 @@ public:
     // method to get all the modifies (assigner, assigned, type) from the database
     static void getModifies(vector<string>& results);
 
+    static void getMLine(string table, string pType, vector<string>& results);
 
     /// [Experimental] Main Dataset ///
     static void insertMain(string Idx, string type, string procedure, string variable, string lhs, string rhs);

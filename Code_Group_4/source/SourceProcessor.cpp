@@ -31,7 +31,7 @@ void SourceProcessor::process(string program)
 	tk.tokenize(program, tokens);
 
 	// Sample printing
-	cout << "Source: Did tokens get populated?: " << tokens.size() << endl;
+	//cout << "Source: Did tokens get populated?: " << tokens.size() << endl;
 	//cout << "What is program?: " << program << endl;
 
 	// store individual elements in a list
@@ -488,7 +488,8 @@ void SourceProcessor::parseVariable(string value)
 	if (checkName(value) == true) 
 	{
 		// Insert variable into database
-		Database::insertVariable(value);
+		//Database::insertVariable(value);
+		processIdx("variable", "None", value);
 	}
 	else 
 	{
@@ -608,7 +609,9 @@ void SourceProcessor::parseAssignee(string lhs, string rhs)
 			// if item is a variable, create record
 			else if (checkName(item) == true)
 			{
-				Database::insertVariable(item);
+
+				//Database::insertVariable(item);
+				processIdx("variable", lhs, item);
 				processIdx("assignment", lhs, item);
 			}
 		}
@@ -654,13 +657,13 @@ void SourceProcessor::processIdx(string option, string lhs = "None", string rhs 
 	}
 	else if (option == "assignment")
 	{
-		Database::insertUse(intToStr(curLineIdx), lhs, rhs, "assignment");
-		Database::insertModifies(intToStr(curLineIdx), rhs, lhs, "assignment");
+		Database::insertUse(intToStr(curLineIdx), lhs, rhs, "assign");
+		Database::insertModifies(intToStr(curLineIdx), rhs, lhs, "assign");
 		useProcessor(saveLineIdx, rhs);
 		modifyProcessor(saveLineIdx, lhs);
 
 		// Experiment push for assignment
-		Database::insertMain(saveLineIdx, "assignment", curProd, "null", lhs, rhs);
+		Database::insertMain(saveLineIdx, "assign", curProd, "null", lhs, rhs);
 	}
 	else if (option == "cStatement")
 	{
@@ -683,7 +686,11 @@ void SourceProcessor::processIdx(string option, string lhs = "None", string rhs 
 	}
 	else if (option == "else")
 	{
-		Database::insertParentStar("else", lhs, rhs);
+		Database::insertParentStar("if", lhs, rhs);
+	}
+	else if (option == "variable")
+	{
+		Database::insertVariable(rhs, saveLineIdx);
 	}
 }
 

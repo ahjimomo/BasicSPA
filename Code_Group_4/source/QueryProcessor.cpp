@@ -8,13 +8,16 @@
 #include <list>
 #include <vector>	        // Use of vector to temporarily store synonymType and name
 #include <unordered_map>	// Use of map to store constantname and values
+#include <algorithm>
+#include <iterator>
 
 #define NUM_EXPR "[0-9]+"
 #define NAME_EXPR "[a-zA-Z]+[0-9]*"
 #define OPERATOR_EXPR "[\+\-\/\%\*]"
 #define COMPARE_EXPR "[\>\<\==\!=]"
 #define TYPE_EXPR "(stmt)|(read)|(print)|(assign)|(while)|(if)|(call)|(variable)|(procedure)|(constant)"
-#define CLAUSE_EXPR "(pattern)|(such)|(that)"
+#define SUCH_EXPR "(such)|(that)|(Such)"
+#define PATTERN_EXPR "(pattern)|(Pattern)"
 
 using namespace std;
 
@@ -31,9 +34,12 @@ vector<string> tempResults;                     // vector storing temp results f
 
 unordered_map<string, string> elemMap;          // Map storing select and query elem name
 
-list<string> qFullComponents;                   // List to track the full query
-list<string> qComponent;                        // List to track the contained query
-list<string> sComponent;                        // List to track select component
+list<string> qFullComponent;                    // List to track the full query
+list<string> qComponent;                        // List to track the contained query (Store the query data type)
+list<string> sComponent;                        // List to track select component (Store the query data type)
+
+unsigned int nested_depth = 0;                  // int to track the level of clause we are in
+vector<string> curClauseResults;                // Vector to track existing clause results
 
 ///// Methods to evaluate query /////
 // iter1: method to evaluate a query
@@ -51,7 +57,7 @@ void QueryProcessor::evaluate(string query, vector<string>& output)
     tk.tokenize(query, tokens);
 
     // Sample printing
-    cout << "Query: Did tokens get tokenized?: " << tokens.size() << endl;
+    //cout << "Query: Did tokens get tokenized?: " << tokens.size() << endl;
 
     // store individual elements in a list
     vector<string> allTokens;
@@ -68,7 +74,7 @@ void QueryProcessor::evaluate(string query, vector<string>& output)
     extract(allTokens);
 
     // Reset class-level variable
-    qFullComponents.clear();
+    qFullComponent.clear();
     qComponent.clear();
     sComponent.clear();
 
@@ -77,20 +83,12 @@ void QueryProcessor::evaluate(string query, vector<string>& output)
     {
         output.push_back(dbResult);
     }
-
-    /*//print results
-    for (unsigned int j = 0; j < output.size(); j++)
-    {
-        cout << "output" << output[j] << endl;
-    }
-    */
-
 }
 
 ///// Extractor /////
 // call the method in database to retrieve the results
-void QueryProcessor::extract(vector<string> tokens) {
-
+void QueryProcessor::extract(vector<string> tokens) 
+{
     TokensList = tokens;                // Initialize TokensList as our temp tokens list (allTokens)
 
     vector<string> prod;                // Vector to track procedure results
@@ -99,6 +97,7 @@ void QueryProcessor::extract(vector<string> tokens) {
 
     string currQ;                       // List to track action
     string prev;                        // List to track prev string we were in
+    string qType;                       // Query type of value
 
     // Commence processing tokens starting with procedure as long as tokens are not exhausted
     while (TokensList.size() > 0) {
@@ -113,42 +112,145 @@ void QueryProcessor::extract(vector<string> tokens) {
         if (TokensList.front() == "Select" | TokensList.front() == "select")
         {
             // Update local tracking lists
-            qFullComponents.push_back(TokensList.front());
-            sComponent.push_back(TokensList.front());
+            qFullComponent.push_back(TokensList.front());
             next_token();
             
             // Case: Single query with no pattern or clause (ie. Left [a] in TokensList)
             if (TokensList.size() == 1)
             {
+                // Update local tracking for selected values
+                sComponent.push_back(TokensList.front());
+
                 // Get data type of queried element
-                string qType = getType(TokensList.front());
+                qType = getType(TokensList.front());
 
                 querySingle(qType, "single");
             }
             // Case: Multiple select queries (ie. <w1, w2, w3>)
-            if (TokensList.front() == "<")
+            else if (TokensList.front() == "<")
             {
                 // Update local tracking lists
-                qFullComponents.push_back(TokensList.front());
-                sComponent.push_back(TokensList.front());
+                next_token();
+                qFullComponent.push_back(TokensList.front());
 
-                // Parse into 
-                //parseNestedSelect();
+                // Parse to capture all the Select component to be returned
+                parseMQuery();
 
+                // End with ">"
+                next_token();
             }
-            // Case: If not of the above, it should be a single variable with additional clause (ie. w1 such that ()..)
+            // Case: If not of the above or completed parsing multiple queries, it should either be such_that or pattern additional clause (ie. w1 such that ()..)
+            // Pattern
             else
             {
-                // Get data type of queried element
-                string qType = getType(TokensList.front());
+                // Iter 2: Single select-value
+                sComponent.push_back(TokensList.front());
+                qType = getType(TokensList.front());
+                next_token();
 
-                // Process clause
-                //next_token();
-                //if (TokensList.front() == )
+                if (checkPatt(TokensList.front()) == true)
+                {
+                    // p1. Update depth level
+                    nested_depth++;
 
+                    qFullComponent.push_back(TokensList.front());
+                    qComponent.push_back(TokensList.front());
+                    string templhs;
+                    string temprhs;
+                    /*  cout << "!!!Tokens: " << TokensList.front() << endl;*/
 
+                    while (TokensList.front() != "(") {
+                        next_token();
+                    }
+                    next_token();
+
+                    /*cout << "!!!Tokens1: " << TokensList.front() << endl;*/
+                    //check lhs
+                    while (TokensList.front() != ",") {
+                        /*cout << "!!!Tokens2: " << TokensList.front() << endl;*/
+                        if (TokensList.front() == "_") {
+                            templhs.push_back('%');
+                            next_token();
+                            /*cout << "!!!Tokens3: " << TokensList.front() << endl;*/
+                        }
+                        else if (TokensList.front() == "\"") {
+                            next_token();
+                            /*cout << "!!!Tokens4: " << TokensList.front() << endl;*/
+                        }
+
+                        else {
+                            if (templhs.empty() || templhs == "%") {
+                                templhs += TokensList.front();
+                            }
+                            else {
+                                templhs = templhs + " " + TokensList.front();
+                                /*cout << "!!!Tokens5: " << TokensList.front() << endl;*/
+                            }
+                            next_token();
+                        }
+
+                    }
+                    next_token();
+                    /*cout << "!!!Tokens6: " << TokensList.front() << endl;*/
+
+                    if (templhs == "%")
+                        templhs = "";
+
+                    //check rhs
+                    while (TokensList.front() != ")") {
+                        if (TokensList.front() == "_") {
+                            temprhs.push_back('%');
+                            next_token();
+                        }
+
+                        else if (TokensList.front() == "\"") {
+                            next_token();
+                        }
+
+                        else {
+                            if (temprhs.empty() || temprhs == "%") {
+                                temprhs += TokensList.front();
+                            }
+                            else {
+                                temprhs = temprhs + " " + TokensList.front();
+                            }
+                            next_token();
+                        }
+
+                    }
+
+                    if (temprhs == "%")
+                        temprhs = "";
+
+                    //cout << "pattern lhs: " << templhs << " rhs:" << temprhs;
+                    Database::getPatterns(databaseResults, templhs, temprhs);
+                }
+
+                // such that
+                else if (checkSuch(TokensList.front()) == true)
+                {
+                    // s1. Update depth level
+                    nested_depth++;
+
+                    // s2. Update local tracking for selected values
+                    vector<string> tempResultLines;
+                    getQueriedIdx(qType, tempResultLines);
+
+                    // s2. Parse and process such that statement
+                    next_token();
+                    vector<string> tempReturnLines = parseSuchThat();
+
+                    //s3. Iter2: Single-select variable and single such-that clause
+                    vector<string> answerLines;
+
+                    sort(tempResultLines.begin(), tempResultLines.end());
+                    sort(tempReturnLines.begin(), tempReturnLines.end());
+                    set_intersection(tempResultLines.begin(), tempResultLines.end(), tempReturnLines.begin(), tempReturnLines.end(), answerLines.begin());
+
+                    //s4. Match the return results
+                    databaseResults = answerLines;
+                }
             }
-            
         }
         // Move to next token
         next_token();
@@ -157,6 +259,158 @@ void QueryProcessor::extract(vector<string> tokens) {
 
 
 ///// Support Methods /////
+// iter 2: Support method to parse 
+vector<string> QueryProcessor::parseTable(string table)
+{
+    // p1. check if first token is "(" 
+    next_token();
+    expectedSymbol("(");
+
+    // p2. Temp vectors to store values
+    vector<string> rootIdx;
+    vector<string> childIdx;
+    vector<string> queryIdx;
+    string pType = getType(TokensList.front());
+
+    // p3. Get all the parentLine and childLine indexes
+    if (table == "parents" | table == "parentsStar")
+    {
+        //Database::getPLine(table, pType, rootIdx);
+        Database::getCLine(table, pType, childIdx);
+    }
+    else if (table == "modifies")
+    {
+        Database::getMLine(table, pType, childIdx);
+    }
+
+    // p4. Get the child query type of the nested value (ie. Parent(w, a)..)
+    next_token();
+    expectedSymbol(",");
+    string cType = getType(TokensList.front());
+
+    // p5. Get the line indexes of the specified queried values
+    getQueriedIdx(cType, queryIdx);
+
+    // p6. Store the child index(es) found as the current temp results
+    // sorting the vectors
+    sort(childIdx.begin(), childIdx.end());
+    sort(queryIdx.begin(), queryIdx.end());
+
+    // Get the difference as existing result
+    vector<string> resultIdx;
+    set_intersection(childIdx.begin(), childIdx.end(), resultIdx.begin(), resultIdx.end(), resultIdx.begin());
+
+    // p7. Return result
+    //expectedSymbol(")");
+    return resultIdx;
+}
+
+// iter 2: Support method to extract index of values queried (Similar to `querySingle` but returning Line Idx instead..)
+void QueryProcessor::getQueriedIdx(string qType, vector<string> resultSpace)
+{
+    // 1. assignment
+    if (qType == "assign")
+    {
+        Database::getAssignments(resultSpace);
+    }
+    // 3. statements
+    else if (qType == "stmt")
+    {
+        Database::getStatements(resultSpace);
+
+    }
+    // 4. read
+    else if (qType == "read")
+    {
+        Database::getReads(resultSpace);
+    }
+    // 5. print
+    else if (qType == "print")
+    {
+        Database::getPrints(resultSpace);
+    }
+    // 6. while
+    else if (qType == "while")
+    {
+        Database::getWhiles(resultSpace, "while", "parentLine", "0");
+    }
+    // 7. if
+    else if (qType == "if")
+    {
+        Database::getIfs(resultSpace, "if", "parentLine", "0");
+    }
+    // 8. variable
+    else if (qType == "variable")
+    {
+        Database::getVariablesIdx(resultSpace);
+    }
+}
+
+
+
+// iter 2: Support method to parse element(s) queried belonging to any of the type of Data type
+vector<string> QueryProcessor::parseSuchThat()
+{
+    // Case: Parent / Parent*
+    if (TokensList.front() == "Parent" | TokensList.front() == "parent")
+    {
+        return parseTable("parents");
+    }
+    else if (TokensList.front() == "Parent*" | TokensList.front() == "parent*")
+    {
+        return parseTable("parentstars");
+    }
+    // Case: Next / Next*
+    else if (TokensList.front() == "Next" | TokensList.front() == "next")
+    {
+        //parseNext();
+    }
+    else if (TokensList.front() == "Next*" | TokensList.front() == "next*")
+    {
+        //parseNextStar();
+    }
+    // Case: Calls
+    else if (TokensList.front() == "Calls" | TokensList.front() == "calls")
+    {
+        //parseCalls();
+    }
+    // Case: Uses
+    else if (TokensList.front() == "Uses" | TokensList.front() == "uses")
+    {
+        //parseUses();
+    }
+    else if (TokensList.front() == "Modifies" | TokensList.front() == "modifies")
+    {
+        return parseTable("modifies");
+    }
+
+    // Case: Check if there are further clauses after this clause, should break loop if it's the end else continue parsing iteratively
+    next_token();
+    if (checkPatt(TokensList.front()) == true)
+    {
+        //parsePattern();
+    }
+    else if (checkSuch(TokensList.front()) == true)
+    {
+        //parseSuchThat();
+    }
+}
+
+// iter 2: Process multiple select queries
+void QueryProcessor::parseMQuery()
+{
+    // Break case: ">"
+    while (TokensList.front() != ">")
+    {
+        // Store queried element in sComponent list if it's not ","
+        if (TokensList.front() != ",")
+        {
+            sComponent.push_back(TokensList.front());
+        }
+        next_token();
+    }
+}
+
 // iter 2: Process single variable
 void QueryProcessor::querySingle(string qType, string option)
 {
@@ -189,12 +443,12 @@ void QueryProcessor::querySingle(string qType, string option)
     // 6. while
     else if (qType == "while")
     {
-        Database::getWhiles(tempResults);
+        Database::getWhiles(tempResults, "while", "parentLine", "0");
     }
     // 7. if
     else if (qType == "if")
     {
-        Database::getIfs(tempResults, "if", "parentLine", 0);
+        Database::getIfs(tempResults, "if", "parentLine", "0");
     }
     // 8. Procedure
     else if (qType == "procedure")
@@ -222,8 +476,8 @@ string QueryProcessor::getType(string elemName)
     return typeFound;
 }
 
-// iter 2: support method to check if token is expression (ie. pattern / such that)
-bool QueryProcessor::checkExpr(string token)
+// iter 2: support method to check if token is SUCH THAT expression
+bool QueryProcessor::checkSuch(string token)
 {
     // Check if token is "such"
     if (token == "such")
@@ -231,8 +485,15 @@ bool QueryProcessor::checkExpr(string token)
         next_token();
     }
 
-    // Return boolean if element is an clause
-    return regex_match(token, regex(CLAUSE_EXPR));
+    // Return boolean if element is an "that" clause
+    return regex_match(token, regex(SUCH_EXPR));
+}
+
+// iter 2: support method to check if token is PATTERN expression
+bool QueryProcessor::checkPatt(string token)
+{
+    // Return boolean if element is an pattern clause
+    return regex_match(token, regex(PATTERN_EXPR));
 }
 
 // iter 2: support method to check token's type
@@ -368,6 +629,11 @@ void QueryProcessor::parseType()
             {
                 elemMap[item] = elem;
             }
+        }
+        // 11. More than 1 item called (ie. ",")
+        if (TokensList.front() == ",")
+        {
+            next_token();
         }
     }
 }

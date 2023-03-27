@@ -7,7 +7,8 @@ Basic Static Program Analyzer (SPA) Project
 - 2.0.1: Modified assignment function processed expression term (ie. x = x + y) 
 - 2.0.2: Patterns, uses, and modifies table to update relationship
 - 2.1.1: Experimental main table tracking main action for every line
-- 2.1.2: Parent and Parent* functions to track parent-child relationship 
+- 2.1.2: Parent and Parent* functions to track parent-child relationship in Source Processor
+- 2.1.3: Pattern clause query processor updated
 
 # Collaborators
 - Collaborators: [Yee Lin](https://github.com/echuayl) and [Nicky](https://github.com/ahjimomo)

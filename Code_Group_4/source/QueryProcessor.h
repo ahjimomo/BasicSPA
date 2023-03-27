@@ -27,15 +27,23 @@ public:
     // method to evaluate query without pattern or such that clause
     void querySingle(string qType, string option);
 
+    // Such that support methods
+    vector<string> parseSuchThat();
+    vector<string> parseTable(string table);
+
     // Type support methods
+    //void getLineIdx(string option, string queryLine, string valueName);
+    void getQueriedIdx(string type, vector<string> resultSpace);
     bool checkType(string token);
     void parseType();
     list<string> parseElemName();
     string getType(string elemName);
+    void parseMQuery();
 
     // General supporting methods
     void next_token();
     bool checkName(string token);
     void expectedSymbol(string symbol);
-    bool checkExpr(string token);
+    bool checkSuch(string token);
+    bool checkPatt(string token);
 };

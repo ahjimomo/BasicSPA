@@ -1,0 +1,74 @@
+1 - Procedure
+procedure p;
+Select p
+dancedanceEvo
+5000
+2 - Variable
+variable v;
+Select v
+num2, num1, num3, h, x,index, y, z, iter2, g, k, j
+5000
+3 - Constant
+constant c;
+Select c
+10, 0, 2
+5000
+4 - Assignment
+assign a;
+Select a
+1, 2, 4, 5
+5000
+5 - Print
+print pr;
+Select pr
+3, 8, 10, 11, 12, 14, 15
+5000
+6 - Read
+read rd;
+Select rd
+6, 9, 16
+5000
+7 - Statement
+stmt s;
+Select s
+1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16
+5000
+8a - Pattern
+assign a;
+Select a pattern a ("num2",_)
+1, 4
+5000
+8b - Pattern
+assign a;
+Select a pattern a (_,"num2")
+None
+5000
+8c - Pattern
+assign a;
+Select a pattern a (_"m2",_)
+1, 4
+5000
+8d - Pattern
+assign a;
+Select a pattern a (_"m2","num3 + x")
+4
+5000
+9 - Parent
+stmt s; 
+Select s such that Parent (1, 2)
+None
+5000
+10 - Parent*
+print pr; while w;
+Select pr such that Parent* (w, pr)
+8
+5000
+11 - Uses
+Procedure p; variable v;
+Select p such that Uses ("dancedanceEvo", "num2")
+1, 4
+5000
+12 - Modifies
+variable v; stmt s; 
+Select v such that Modifies (4, v)
+num2

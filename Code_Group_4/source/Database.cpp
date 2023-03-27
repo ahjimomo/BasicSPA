@@ -29,7 +29,7 @@ void Database::initialize() {
     sqlite3_exec(dbConnection, dropVariableTableSQL.c_str(), NULL, 0, &errorMessage);
 
     // create a variable table
-    string createVariableTableSQL = "CREATE TABLE variables ( variableName VARCHAR(255) PRIMARY KEY);";
+    string createVariableTableSQL = "CREATE TABLE variables ( variableName VARCHAR(255), variableLine VARCHAR(255));";
     sqlite3_exec(dbConnection, createVariableTableSQL.c_str(), NULL, 0, &errorMessage);
 
     /// Constant ///
@@ -194,8 +194,8 @@ void Database::insertProcedure(string procedureName) {
 }
 
 // method to insert a variable into the database
-void Database::insertVariable(string variableName) {
-    string insertVariableSQL = "INSERT INTO variables ('variableName') VALUES ('" + variableName + "');";
+void Database::insertVariable(string variableName, string variableLine) {
+    string insertVariableSQL = "INSERT INTO variables ('variableName', 'variableLine') VALUES ('" + variableName + "', '" + variableLine + "');";
     sqlite3_exec(dbConnection, insertVariableSQL.c_str(), NULL, 0, &errorMessage);
 }
 
@@ -302,6 +302,30 @@ int Database::callback(void* NotUsed, int argc, char** argv, char** azColName) {
 
 
 ///// Get /////
+// iter 2: method to get Child Line index(es) from Parent/Parent* Table 
+void Database::getCLine(string table, string pType, vector<string>& results)
+{
+    // clear existing results
+    dbResults.clear();
+
+    string getCLineSQL = "SELECT DISTINCT childLine FROM " + table + " WHERE type = " + pType + ";";
+    sqlite3_exec(dbConnection, getCLineSQL.c_str(), callback, 0, &errorMessage);
+
+    postProcess(dbResults, results);
+}
+
+// iter 2: method to get Parent Line index(es) from Parent/Parent* Table
+void Database::getPLine(string table, string pType, vector<string>& results)
+{
+    // clear existing results
+    dbResults.clear();
+
+    string getPLineSQL = "SELECT DISTINCT parentLine FROM " + table + " WHERE type = " + pType + ";";
+    sqlite3_exec(dbConnection, getPLineSQL.c_str(), callback, 0, &errorMessage);
+
+    postProcess(dbResults, results);
+}
+
 // iter 2: method to get all the ifs with stipulated line number
 // Arguments:
 //  - string parentType: While/If/Else
@@ -309,19 +333,19 @@ int Database::callback(void* NotUsed, int argc, char** argv, char** azColName) {
 //  - int specificLine: 0 for everything and other integer values for specify index
 // Returns:
 //  - 2 columns [type, line index] (ie. [if, 3])
-void Database::getIfs(vector<string>& results, string parentType, string parentOrChild, int specificLine) {
+void Database::getIfs(vector<string>& results, string parentType, string parentOrChild, string specificLine) 
+{
     // clear the existing results
     dbResults.clear();
 
-    if (specificLine == 0)
+    if (specificLine == "0")
     {
-        string getIfsSQL = "SELECT DISTINCT type, CASE " + parentOrChild + " WHEN 'root' THEN 0 ELSE " + parentOrChild + " END " + parentOrChild + " FROM parents WHERE type = " + parentType + ";";
+        string getIfsSQL = "SELECT DISTINCT CASE " + parentOrChild + " WHEN 'root' THEN 0 ELSE " + parentOrChild + " END " + parentOrChild + " FROM parents WHERE type = " + parentType + ";";
         sqlite3_exec(dbConnection, getIfsSQL.c_str(), callback, 0, &errorMessage);
     }
     else
     {
-        string stringLine = intToStr(specificLine);
-        string getIfsSQL = "SELECT DISTINCT type, CASE " + parentOrChild + " WHEN 'root' THEN 0 ELSE " + parentOrChild + " END " + parentOrChild + " FROM parents WHERE type = " + parentType + " AND " + parentOrChild + " = " + stringLine + ";";
+        string getIfsSQL = "SELECT DISTINCT CASE " + parentOrChild + " WHEN 'root' THEN 0 ELSE " + parentOrChild + " END " + parentOrChild + " FROM parents WHERE type = " + parentType + " AND " + parentOrChild + " = " + specificLine + ";";
         sqlite3_exec(dbConnection, getIfsSQL.c_str(), callback, 0, &errorMessage);
     }
 
@@ -330,14 +354,21 @@ void Database::getIfs(vector<string>& results, string parentType, string parentO
 }
 
 // iter 2: method to get all the parent Whiles
-void Database::getWhiles(vector<string>& results) {
+void Database::getWhiles(vector<string>& results, string parentType, string parentOrChild, string specificLine) 
+{
     // clear the existing results
     dbResults.clear();
 
-    // retrieve the (preceding line, current line) from the calls table
-    // The callback method is only used when there are results to be returned.
-    string getWhilesSQL = "SELECT DISTINCT(parentLine) FROM parents WHERE type = 'while';";
-    sqlite3_exec(dbConnection, getWhilesSQL.c_str(), callback, 0, &errorMessage);
+    if (specificLine == "0")
+    {
+        string getWhilesSQL = "SELECT DISTINCT CASE " + parentOrChild + " WHEN 'root' THEN 0 ELSE " + parentOrChild + " END " + parentOrChild + " FROM parents WHERE type = " + parentType + ";";
+        sqlite3_exec(dbConnection, getWhilesSQL.c_str(), callback, 0, &errorMessage);
+    }
+    else
+    {
+        string getWhilesSQL = "SELECT DISTINCT CASE " + parentOrChild + " WHEN 'root' THEN 0 ELSE " + parentOrChild + " END " + parentOrChild + " FROM parents WHERE type = " + parentType + " AND " + parentOrChild + " = " + specificLine + ";";
+        sqlite3_exec(dbConnection, getWhilesSQL.c_str(), callback, 0, &errorMessage);
+    }
 
     // postprocess the results from the database so that the output is just a vector of procedure names
     postProcess(dbResults, results);
@@ -366,6 +397,20 @@ void Database::getModifies(vector<string>& results) {
     // The callback method is only used when there are results to be returned.
     string getModifiesSQL = "SELECT * FROM modifies;";
     sqlite3_exec(dbConnection, getModifiesSQL.c_str(), callback, 0, &errorMessage);
+
+    // postprocess the results from the database so that the output is just a vector of procedure names
+    postProcess(dbResults, results);
+}
+
+void Database::getMLine(string table, string pType, vector<string>& results)
+{
+    // clear the existing results
+    dbResults.clear();
+
+    // retrieve the (preceding procedure, current procedure) from the calls table
+    // The callback method is only used when there are results to be returned.
+    string getMLineSQL = "SELECT modifyLine FROM modifies WHERE type = " + pType + "; ";
+    sqlite3_exec(dbConnection, getMLineSQL.c_str(), callback, 0, &errorMessage);
 
     // postprocess the results from the database so that the output is just a vector of procedure names
     postProcess(dbResults, results);
@@ -414,17 +459,38 @@ void Database::getUses(vector<string>& results) {
 }
  
 // iter 2: method to get all the patterns (lhs, rhs) from the database
-void Database::getPatterns(vector<string>& results) {
+void Database::getPatterns(vector<string>& results, string lhs, string rhs) {
     // clear the existing results
     dbResults.clear();
 
     // retrieve the lhs, rhs from the patterns table
     // The callback method is only used when there are results to be returned.
-    string getPatternsSQL = "SELECT lhs, rhs FROM patterns;";
-    sqlite3_exec(dbConnection, getPatternsSQL.c_str(), callback, 0, &errorMessage);
+    if (lhs.empty()) {
+        string getPatternsSQL = "SELECT patternLine FROM patterns WHERE rhs LIKE '" + rhs + "'; ";
+        //cout << "sql1== " << getPatternsSQL << endl;
+        sqlite3_exec(dbConnection, getPatternsSQL.c_str(), callback, 0, &errorMessage);
+    }
+
+    else if (rhs.empty()) {
+        string getPatternsSQL = "SELECT patternLine FROM patterns WHERE lhs LIKE '" + lhs + "'; ";
+        //cout << "sql2== " << getPatternsSQL << endl;
+        sqlite3_exec(dbConnection, getPatternsSQL.c_str(), callback, 0, &errorMessage);
+    }
+
+    else {
+        string getPatternsSQL = "SELECT patternLine FROM patterns WHERE lhs LIKE '" + lhs + "' AND rhs LIKE '" + rhs + "'; ";
+        //cout << "sql3== " << getPatternsSQL << endl;
+        sqlite3_exec(dbConnection, getPatternsSQL.c_str(), callback, 0, &errorMessage);
+    }
 
     // postprocess the results from the database so that the output is just a vector of procedure names
+    //cout << "program enter here" << endl;
+
     postProcess(dbResults, results);
+
+    //cout << "results size: " << results.size() << endl;
+
+    //cout << "program enter here too" << endl;
 }
 
 // iter 2: method to get all the parents* statements from the database
@@ -476,8 +542,21 @@ void Database::getVariables(vector<string>& results) {
 
     // retrieve the variables from the variable table
     // The callback method is only used when there are results to be returned.
-    string getVariableSQL = "SELECT * FROM variables;";
+    string getVariableSQL = "SELECT DISTINCT variableName FROM variables;";
     sqlite3_exec(dbConnection, getVariableSQL.c_str(), callback, 0, &errorMessage);
+
+    // postprocess the results from the database so that the output is just a vector
+    postProcess(dbResults, results);
+}
+
+void Database::getVariablesIdx(vector<string>& results) {
+    // clear the existing results
+    dbResults.clear();
+
+    // retrieve the variables from the variable table
+    // The callback method is only used when there are results to be returned.
+    string getVariableIdxSQL = "SELECT DISTINCT variableLine FROM variables;";
+    sqlite3_exec(dbConnection, getVariableIdxSQL.c_str(), callback, 0, &errorMessage);
 
     // postprocess the results from the database so that the output is just a vector
     postProcess(dbResults, results);
@@ -510,6 +589,7 @@ void Database::getAssignments(vector<string>& results) {
     // postprocess the results from the database so that the output is just a vector
     postProcess(dbResults, results);
 }
+
 
 // method to get all the statements from the database
 void Database::getStatements(vector<string>& results) {
