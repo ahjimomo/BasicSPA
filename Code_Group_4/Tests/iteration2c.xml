@@ -1,0 +1,107 @@
+<?xml-stylesheet type="text/xsl" href="analysis.xsl"?>
+<test_results>
+<info>
+<name>Debug</name><parsing_time_taken>498.000000</parsing_time_taken>
+</info>
+<queries>
+<query>
+<id ReturnTuple="1" CondNum="1" RelNum="0" comment="stmt entity no clause">1001</id><querystr><![CDATA[stmt s; Select s]]></querystr>
+<stuans>1,2,3,5,7,10,11,13,14,15,16,18,19</stuans>
+<correct>1,10,11,12,13,14,15,16,17,18,19,2,3,4,5,6,7,8,9</correct>
+<time_taken>6.000000</time_taken>
+<failed>
+<missing>12,17,4,6,8,9</missing>
+<additional></additional>
+<summary>
+<expected>19</expected>
+<matched>13</matched>
+<missing>6</missing>
+<additional>0</additional>
+</summary>
+</failed>
+</query>
+<query>
+<id ReturnTuple="1" CondNum="1" RelNum="0" comment="read entity no clause">1002</id><querystr><![CDATA[read r; Select r]]></querystr>
+<stuans>1</stuans>
+<correct>1</correct>
+<time_taken>4.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" CondNum="1" RelNum="0" comment="print entity no clause">1003</id><querystr><![CDATA[print pr; Select pr]]></querystr>
+<stuans>3,13,16,18,19</stuans>
+<correct>13,16,18,19,3</correct>
+<time_taken>9.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" CondNum="1" RelNum="0" comment="while entity no clause">1004</id><querystr><![CDATA[while w; Select w]]></querystr>
+<stuans></stuans>
+<correct>12,4,6</correct>
+<time_taken>5.000000</time_taken>
+<failed>
+<missing>12,4,6</missing>
+<additional></additional>
+<summary>
+<expected>3</expected>
+<matched>0</matched>
+<missing>3</missing>
+<additional>0</additional>
+</summary>
+</failed>
+</query>
+<query>
+<id ReturnTuple="1" CondNum="1" RelNum="0" comment="if entity no clause">1005</id><querystr><![CDATA[if ifs; Select ifs]]></querystr>
+<stuans></stuans>
+<correct>17,8,9</correct>
+<time_taken>6.000000</time_taken>
+<failed>
+<missing>17,8,9</missing>
+<additional></additional>
+<summary>
+<expected>3</expected>
+<matched>0</matched>
+<missing>3</missing>
+<additional>0</additional>
+</summary>
+</failed>
+</query>
+<query>
+<id ReturnTuple="1" CondNum="1" RelNum="0" comment="assign entity no clause">1006</id><querystr><![CDATA[assign a; Select a]]></querystr>
+<stuans>10,11,14,15,2,5,7</stuans>
+<correct>10,11,14,15,2,5,7</correct>
+<time_taken>7.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" CondNum="1" RelNum="0" comment="variable entity no clause">1007</id><querystr><![CDATA[variable v; Select v]]></querystr>
+<stuans>a,b,d,c,add,negative,positive</stuans>
+<correct>a,add,b,c,d,nonzero,zero</correct>
+<time_taken>7.000000</time_taken>
+<failed>
+<missing>nonzero,zero</missing>
+<additional>negative,positive</additional>
+<summary>
+<expected>7</expected>
+<matched>5</matched>
+<missing>2</missing>
+<additional>2</additional>
+</summary>
+</failed>
+</query>
+<query>
+<id ReturnTuple="1" CondNum="1" RelNum="0" comment="constant entity no clause">1008</id><querystr><![CDATA[constant c; Select c]]></querystr>
+<stuans>20,30,10,0</stuans>
+<correct>0,10,20,30</correct>
+<time_taken>5.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" CondNum="1" RelNum="0" comment="procedure entity no clause">1009</id><querystr><![CDATA[procedure p; Select p]]></querystr>
+<stuans>NestedWhileIf</stuans>
+<correct>NestedWhileIf</correct>
+<time_taken>9.000000</time_taken>
+<passed/>
+</query>
+<query>
+<id ReturnTuple="1" Parent="1" UnnamedVar="2" SuchThat="1" CondNum="5" RelNum="1" comment="Parent 2 wildcards">1030</id><querystr><![CDATA[read r; Select r such that Parent(_, _)]]></querystr>

@@ -76,6 +76,15 @@ std::list<string> l_ops;						// list to track all lhs of comparison
 std::list<string> r_ops;						// list to track all rhs of comparison
 std::list<string> f_ops;						// list to track the full container statement for if/while loop
 
+int wrootLine = 1;								// int to store LineIdx for while loop as base
+int irootLine = 1;								// int to store LineIdx for if loop as base
+int prevLine = 1;								// int to track general line index for flow
+int ifIdx = 0;									// int to track the last if-loop index
+int inLoop_flag = 0;							// int to track if in-loop flag is active
+int switch_w_flag = 0;							// int to track if rootLine should be used instead of prevLine for next-time (right after exiting WHILE loop)
+int switch_i_flag = 0;							// int to track for else loop to ensure update of if-loop pointer
+int switch_e_flag = 0;							// int to track if we just switched into else loop
+
 std::list<string> patternFullList;				// List to store all values in condition expression (Use Substr function to extract patterns https://www.sqlitetutorial.net/sqlite-functions/sqlite-substr/#:~:text=The%20SQLite%20substr%20function%20returns,position%20with%20a%20predefined%20length.)
 
 
@@ -216,24 +225,36 @@ void SourceProcessor::parseStatement(string additional = "Default")
 		// 3. Iter 2: Check if while function is called
 		else if (TokensList.front() == "while")
 		{
+			// Update line capturing statement in DB
+			processIdx("statement", "None", "None");
+			processIdx("next", intToStr(prevLine), intToStr(curLineIdx));
+
+			// Update root index for Next table
+			wrootLine = curLineIdx;
+			prevLine = curLineIdx;
+			inLoop_flag = 1;
+
+			//cout << "While loop: Current Line Idx:" << curLineIdx << endl;
+
 			// Update the index of while function called & update DB
 			next_token();
 			parseWhile();
+			curLineIdx++;
 
 			// Next element should be a '{' to finish move into statement
 			next_token();
 			expectedSymbol("{");
-			curLineIdx++;
 
 			// Activate the 'while-flag'
 			w_flag = 1;
 
 			// parse statement to end with "}"
 			parseStatement();
-			expectedSymbol("}");
 			curLineIdx--;
+			expectedSymbol("}");
 
-			// Reset the 'while-flag'
+			// Reset the 'while-flag' & in-loop flag
+			inLoop_flag = 0;
 			w_flag = 0;
 		}
 
@@ -247,23 +268,38 @@ void SourceProcessor::parseStatement(string additional = "Default")
 		// 5. iter 2: Check if it is if-statement
 		else if (TokensList.front() == "if")
 		{
+			// Update line capturing statement in DB
+			processIdx("statement", "None", "None");
+			if (switch_w_flag != 1)
+			{
+				cout << "Starting if loop: " << prevLine << " next up " << curLineIdx << endl;
+				processIdx("next", intToStr(prevLine), intToStr(curLineIdx));
+			}
+
+
+			// Update root & current line index index for Next table
+			irootLine = curLineIdx;
+			prevLine = curLineIdx;
+			inLoop_flag = 1;
+
 			// Parse if & update if_flag
-			i_flag = 1;
 			next_token();
 			parseIf("if");
+			curLineIdx++;
+			i_flag = 1;
 
 			// Next element should be a 'then {' to finish move into statement
 			next_token();
 			expectedSymbol("then");
 			expectedSymbol("{");
-			curLineIdx++;
 
 			// Process the if-statement
 			parseStatement();
-			expectedSymbol("}");
 			curLineIdx--;
+			expectedSymbol("}");
 
-			// Reset if flag
+			// Reset if flag & exit loop
+			inLoop_flag = 0;
 			i_flag = 0;
 		}
 		// 6. iter 2: Check if it's an else statement
@@ -271,12 +307,23 @@ void SourceProcessor::parseStatement(string additional = "Default")
 		{
 			// Update e_flag & Line else since 'else' is not counted
 			e_flag = 1;
+
+			// Capture last line of if-statement for after if..else statement
+			ifIdx = prevLine;
+
+			// Ensure that last if-statement idx does not point to else-statement as they are not dependent event
+			switch_e_flag = 1;
+			
 			expectedSymbol("else");
 			expectedSymbol("{");
 
 			parseStatement();
-			expectedSymbol("}");
 			curLineIdx--;
+
+			expectedSymbol("}");
+
+			// Ensure that previous if-statement next-pointer is captured
+			switch_i_flag = 1;
 
 			// reset e_flag
 			e_flag = 0;
@@ -295,18 +342,90 @@ void SourceProcessor::parseStatement(string additional = "Default")
 		if (w_flag == 1)
 		{
 			processIdx("while", intToStr(curWhileCounter), intToStr(curLineIdx));
+			cout << "While loop updating " << wrootLine << " - " << curLineIdx << endl;
+			processIdx("next", intToStr(wrootLine), intToStr(curLineIdx)); // NOTE: Remove if not all hosted in while need to link to root
+
+			// Update switch flag
+			switch_w_flag = 1;
+
+			if (prevLine != wrootLine && prevLine != curLineIdx) // NOTE: Change to (prevLine != curLineIdx) if not all hosted in while need to link to root
+			{
+				cout << "Updating while loop next table: " << prevLine << " next: " << curLineIdx << endl;
+				processIdx("next", intToStr(prevLine), intToStr(curLineIdx));
+			}
 		}
 		// Update additional tables if necessary for 'if-flag is activated'
 		if (i_flag == 1)
 		{
 			// Update index to track childs
 			processIdx("if", intToStr(curIfCounter), intToStr(curLineIdx));
+
+			cout << "iroot to next " << irootLine << " to " << curLineIdx << endl;
+			processIdx("next", intToStr(irootLine), intToStr(curLineIdx)); // NOTE: Remove if not all hosted in if need to link to root, change irootLine to prevLine.
 		}
 		if (e_flag == 1)
 		{
 			// Update index to track childs
 			processIdx("else", intToStr(curIfCounter), intToStr(curLineIdx));
+
+			// Check if it's the first iteration of else-loop, skip the if to else transition
+			//if (ifIdx == prevLine)
+			//{
+			cout << "else iroot to next " << irootLine << " to " << curLineIdx << endl;
+			processIdx("next", intToStr(irootLine), intToStr(curLineIdx));
+			//}
+
 		}
+
+		// Update next table: Outside of while or if loop
+		if (inLoop_flag == 0 && curLineIdx != 1 && prevLine != curLineIdx)
+		{
+			if (switch_w_flag == 1)
+			{
+				cout << "Exiting while loop: " << wrootLine << " to " << curLineIdx << endl;
+				processIdx("next", intToStr(wrootLine), intToStr(curLineIdx));
+				switch_w_flag = 0;
+			}
+			else
+			{
+				// Additional check if we just exited the else-loop, next of last if-statement to after if..else statement
+				if (switch_i_flag == 1)
+				{
+					cout << "Exit if update: " << ifIdx << " - " << curLineIdx << endl;
+					processIdx("next", intToStr(ifIdx), intToStr(curLineIdx));
+					switch_i_flag = 0;
+				}
+				if (prevLine != ifIdx)
+				{
+					cout << "Out of loop updating: " << prevLine << " to " << curLineIdx << endl;
+					processIdx("next", intToStr(prevLine), intToStr(curLineIdx));
+				}
+			}
+		}
+		// Update next table: Within if/else loop
+		else if (inLoop_flag == 1 && w_flag != 1 && curLineIdx != 1)
+		{
+			if (switch_w_flag == 1)
+			{
+				cout << "Exiting while loop 2: " << wrootLine << " to " << prevLine << endl;
+				processIdx("next", intToStr(wrootLine), intToStr(prevLine));
+				switch_w_flag = 0;
+			}
+			else if (prevLine != irootLine && prevLine != curLineIdx && switch_e_flag == 0)
+			{
+					cout << "Updating table in loops: " << prevLine << " to " << curLineIdx << endl;
+					processIdx("next", intToStr(prevLine), intToStr(curLineIdx));
+			
+			}
+			else if (switch_e_flag == 1)
+			{
+				switch_e_flag = 0;
+			}
+		}
+
+		// Track previous Line Index
+		prevLine = curLineIdx;
+
 		// Update count of line & move to next element
 		curLineIdx++;
 	}
@@ -623,10 +742,7 @@ void SourceProcessor::parseAssignee(string lhs, string rhs)
 void SourceProcessor::processIdx(string option, string lhs = "None", string rhs = "None")
 {
 	// Convert current line index to string using stringstream object (https://www.simplilearn.com/tutorials/cpp-tutorial/int-to-string-cpp)
-	string saveLineIdx;
-	stringstream lineIdx;
-	lineIdx << curLineIdx;
-	lineIdx >> saveLineIdx;
+	string saveLineIdx = intToStr(curLineIdx);
 
 	// process index
 	if (option == "print")
@@ -638,8 +754,13 @@ void SourceProcessor::processIdx(string option, string lhs = "None", string rhs 
 
 		// Experiment push for print
 		Database::insertMain(saveLineIdx, "print", curProd, TokensList.front(), "null", "null");
-
 	}
+	// iter 3: Next
+	else if (option == "next")
+	{
+		Database::insertNext(lhs, rhs);
+	}
+
 	else if (option == "read")
 	{
 		Database::insertRead(saveLineIdx);

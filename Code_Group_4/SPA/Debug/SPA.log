@@ -1,2 +1,14 @@
-﻿  SPA.vcxproj -> C:\Users\User\Desktop\Nicky\NUS\TIC2003 Software Development Project\workspace\BasicSPA\Code_Group_4\Debug\SPA.lib
+﻿  SourceProcessor.cpp
+C:\Users\User\Desktop\Nicky\NUS\TIC2003 Software Development Project\workspace\BasicSPA\Code_Group_4\source\SourceProcessor.cpp(112,32): warning C4101: 'e': unreferenced local variable
+C:\Users\User\Desktop\Nicky\NUS\TIC2003 Software Development Project\workspace\BasicSPA\Code_Group_4\source\SourceProcessor.cpp(878,34): warning C4129: '+': unrecognized character escape sequence
+C:\Users\User\Desktop\Nicky\NUS\TIC2003 Software Development Project\workspace\BasicSPA\Code_Group_4\source\SourceProcessor.cpp(878,34): warning C4129: '-': unrecognized character escape sequence
+C:\Users\User\Desktop\Nicky\NUS\TIC2003 Software Development Project\workspace\BasicSPA\Code_Group_4\source\SourceProcessor.cpp(878,34): warning C4129: '/': unrecognized character escape sequence
+C:\Users\User\Desktop\Nicky\NUS\TIC2003 Software Development Project\workspace\BasicSPA\Code_Group_4\source\SourceProcessor.cpp(878,34): warning C4129: '%': unrecognized character escape sequence
+C:\Users\User\Desktop\Nicky\NUS\TIC2003 Software Development Project\workspace\BasicSPA\Code_Group_4\source\SourceProcessor.cpp(878,34): warning C4129: '*': unrecognized character escape sequence
+C:\Users\User\Desktop\Nicky\NUS\TIC2003 Software Development Project\workspace\BasicSPA\Code_Group_4\source\SourceProcessor.cpp(885,34): warning C4129: '>': unrecognized character escape sequence
+C:\Users\User\Desktop\Nicky\NUS\TIC2003 Software Development Project\workspace\BasicSPA\Code_Group_4\source\SourceProcessor.cpp(885,34): warning C4129: '<': unrecognized character escape sequence
+C:\Users\User\Desktop\Nicky\NUS\TIC2003 Software Development Project\workspace\BasicSPA\Code_Group_4\source\SourceProcessor.cpp(885,34): warning C4129: '=': unrecognized character escape sequence
+C:\Users\User\Desktop\Nicky\NUS\TIC2003 Software Development Project\workspace\BasicSPA\Code_Group_4\source\SourceProcessor.cpp(885,34): warning C4129: '!': unrecognized character escape sequence
+C:\Users\User\Desktop\Nicky\NUS\TIC2003 Software Development Project\workspace\BasicSPA\Code_Group_4\source\SourceProcessor.cpp(834): warning C4715: 'SourceProcessor::parseConstant': not all control paths return a value
+  SPA.vcxproj -> C:\Users\User\Desktop\Nicky\NUS\TIC2003 Software Development Project\workspace\BasicSPA\Code_Group_4\Debug\SPA.lib
   Warning: Full debug symbol generation from partial PDBs is not supported for static libraries.

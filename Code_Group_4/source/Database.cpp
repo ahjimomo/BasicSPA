@@ -181,7 +181,7 @@ void Database::insertMain(string Idx, string type, string procedure, string vari
     sqlite3_exec(dbConnection, insertMainSQL.c_str(), NULL, 0, &errorMessage);
 }
 
-// method to insert an next into the database
+// iter 3: method to insert an next into the database
 void Database::insertNext(string prevLine, string nextLine) {
     string insertNextSQL = "INSERT INTO nexts ('prevLine' , 'nextLine') VALUES ('" + prevLine + "' , '" + nextLine + "');";
     sqlite3_exec(dbConnection, insertNextSQL.c_str(), NULL, 0, &errorMessage);
@@ -375,13 +375,37 @@ void Database::getWhiles(vector<string>& results, string parentType, string pare
 }
 
 
-void Database::getNexts(vector<string>& results) {
+// iter 3: method to the next* from the database
+void Database::getNextStars(string getLine, vector<string>& results) {
     // clear the existing results
     dbResults.clear();
 
     // retrieve the (preceding line, current line) from the calls table
     // The callback method is only used when there are results to be returned.
-    string getNextsSQL = "SELECT * FROM nexts;";
+    string getNextStarsSQL = "WITH RECURSIVE cte AS (\
+        SELECT nextLine\
+        FROM nexts\
+        WHERE prevLine = " + getLine + "\
+        UNION\
+        SELECT t2.nextLine\
+        FROM nexts t2\
+        INNER JOIN cte ON cte.nextLine = t2." + getLine + "\
+        )\
+        SELECT nextLine FROM cte;";
+    sqlite3_exec(dbConnection, getNextStarsSQL.c_str(), callback, 0, &errorMessage);
+
+    // postprocess the results from the database so that the output is just a vector of nextLine indexes
+    postProcess(dbResults, results);
+}
+
+// iter 3: method to the next from the database
+void Database::getNexts(string getLine, vector<string>& results) {
+    // clear the existing results
+    dbResults.clear();
+
+    // retrieve the (preceding line, current line) from the calls table
+    // The callback method is only used when there are results to be returned.
+    string getNextsSQL = "SELECT nextLine FROM nexts WHERE prevLine = " + getLine + ";";
     sqlite3_exec(dbConnection, getNextsSQL.c_str(), callback, 0, &errorMessage);
 
     // postprocess the results from the database so that the output is just a vector of procedure names

@@ -27,7 +27,10 @@ public:
     static void insertNext(string prevLine, string nextLine);
 
     // method to get all the next from the database
-    static void getNexts(vector<string>& results);
+    static void getNexts(string getLine, vector<string>& results);
+
+    // method to get the next* from the database
+    static void getNextStars(string getLine, vector<string>& results);
 
     /// iter 2: Parents / Parents* ///
     // method to insert a parent into the database

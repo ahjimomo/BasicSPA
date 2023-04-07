@@ -1,7 +1,7 @@
 <?xml-stylesheet type="text/xsl" href="analysis.xsl"?>
 <test_results>
 <info>
-<name>AutoTester</name><parsing_time_taken>218.000000</parsing_time_taken>
+<name>AutoTester</name><parsing_time_taken>251.000000</parsing_time_taken>
 </info>
 <queries>
 <query>
@@ -15,42 +15,42 @@
 <id ReturnTuple="1" CondNum="1" RelNum="0" comment="Variable">2</id><querystr><![CDATA[variable v; Select v]]></querystr>
 <stuans>num1,index</stuans>
 <correct>num1,index</correct>
-<time_taken>10.000000</time_taken>
+<time_taken>8.000000</time_taken>
 <passed/>
 </query>
 <query>
 <id ReturnTuple="1" CondNum="1" RelNum="0" comment="Constant">3</id><querystr><![CDATA[constant c; Select c]]></querystr>
 <stuans></stuans>
 <correct></correct>
-<time_taken>15.000000</time_taken>
+<time_taken>6.000000</time_taken>
 <passed/>
 </query>
 <query>
 <id ReturnTuple="1" CondNum="1" RelNum="0" comment="Assignment">4</id><querystr><![CDATA[assign a; Select a]]></querystr>
 <stuans>2</stuans>
 <correct>2</correct>
-<time_taken>18.000000</time_taken>
+<time_taken>10.000000</time_taken>
 <passed/>
 </query>
 <query>
 <id ReturnTuple="1" CondNum="1" RelNum="0" comment="Print">5</id><querystr><![CDATA[print pr; Select pr]]></querystr>
 <stuans>3,4</stuans>
 <correct>3,4</correct>
-<time_taken>8.000000</time_taken>
+<time_taken>6.000000</time_taken>
 <passed/>
 </query>
 <query>
 <id ReturnTuple="1" CondNum="1" RelNum="0" comment="Read">6</id><querystr><![CDATA[read rd; Select rd]]></querystr>
 <stuans>1</stuans>
 <correct>1</correct>
-<time_taken>15.000000</time_taken>
+<time_taken>16.000000</time_taken>
 <passed/>
 </query>
 <query>
 <id ReturnTuple="1" CondNum="1" RelNum="0" comment="Statement">7</id><querystr><![CDATA[stmt s; Select s]]></querystr>
 <stuans>1,2,3,4</stuans>
 <correct>1,2,3,4</correct>
-<time_taken>13.000000</time_taken>
+<time_taken>15.000000</time_taken>
 <passed/>
 </query>
 </queries>
