@@ -272,7 +272,7 @@ void SourceProcessor::parseStatement(string additional = "Default")
 			processIdx("statement", "None", "None");
 			if (switch_w_flag != 1)
 			{
-				cout << "Starting if loop: " << prevLine << " next up " << curLineIdx << endl;
+				//cout << "Starting if loop: " << prevLine << " next up " << curLineIdx << endl;
 				processIdx("next", intToStr(prevLine), intToStr(curLineIdx));
 			}
 
@@ -342,7 +342,7 @@ void SourceProcessor::parseStatement(string additional = "Default")
 		if (w_flag == 1)
 		{
 			processIdx("while", intToStr(curWhileCounter), intToStr(curLineIdx));
-			cout << "While loop updating " << wrootLine << " - " << curLineIdx << endl;
+			//cout << "While loop updating " << wrootLine << " - " << curLineIdx << endl;
 			processIdx("next", intToStr(wrootLine), intToStr(curLineIdx)); // NOTE: Remove if not all hosted in while need to link to root
 
 			// Update switch flag
@@ -350,7 +350,7 @@ void SourceProcessor::parseStatement(string additional = "Default")
 
 			if (prevLine != wrootLine && prevLine != curLineIdx) // NOTE: Change to (prevLine != curLineIdx) if not all hosted in while need to link to root
 			{
-				cout << "Updating while loop next table: " << prevLine << " next: " << curLineIdx << endl;
+				//cout << "Updating while loop next table: " << prevLine << " next: " << curLineIdx << endl;
 				processIdx("next", intToStr(prevLine), intToStr(curLineIdx));
 			}
 		}
@@ -360,7 +360,7 @@ void SourceProcessor::parseStatement(string additional = "Default")
 			// Update index to track childs
 			processIdx("if", intToStr(curIfCounter), intToStr(curLineIdx));
 
-			cout << "iroot to next " << irootLine << " to " << curLineIdx << endl;
+			//cout << "iroot to next " << irootLine << " to " << curLineIdx << endl;
 			processIdx("next", intToStr(irootLine), intToStr(curLineIdx)); // NOTE: Remove if not all hosted in if need to link to root, change irootLine to prevLine.
 		}
 		if (e_flag == 1)
@@ -371,7 +371,7 @@ void SourceProcessor::parseStatement(string additional = "Default")
 			// Check if it's the first iteration of else-loop, skip the if to else transition
 			//if (ifIdx == prevLine)
 			//{
-			cout << "else iroot to next " << irootLine << " to " << curLineIdx << endl;
+			//cout << "else iroot to next " << irootLine << " to " << curLineIdx << endl;
 			processIdx("next", intToStr(irootLine), intToStr(curLineIdx));
 			//}
 
@@ -382,7 +382,7 @@ void SourceProcessor::parseStatement(string additional = "Default")
 		{
 			if (switch_w_flag == 1)
 			{
-				cout << "Exiting while loop: " << wrootLine << " to " << curLineIdx << endl;
+				//cout << "Exiting while loop: " << wrootLine << " to " << curLineIdx << endl;
 				processIdx("next", intToStr(wrootLine), intToStr(curLineIdx));
 				switch_w_flag = 0;
 			}
@@ -391,13 +391,13 @@ void SourceProcessor::parseStatement(string additional = "Default")
 				// Additional check if we just exited the else-loop, next of last if-statement to after if..else statement
 				if (switch_i_flag == 1)
 				{
-					cout << "Exit if update: " << ifIdx << " - " << curLineIdx << endl;
+					//cout << "Exit if update: " << ifIdx << " - " << curLineIdx << endl;
 					processIdx("next", intToStr(ifIdx), intToStr(curLineIdx));
 					switch_i_flag = 0;
 				}
 				if (prevLine != ifIdx)
 				{
-					cout << "Out of loop updating: " << prevLine << " to " << curLineIdx << endl;
+					//cout << "Out of loop updating: " << prevLine << " to " << curLineIdx << endl;
 					processIdx("next", intToStr(prevLine), intToStr(curLineIdx));
 				}
 			}
@@ -407,13 +407,13 @@ void SourceProcessor::parseStatement(string additional = "Default")
 		{
 			if (switch_w_flag == 1)
 			{
-				cout << "Exiting while loop 2: " << wrootLine << " to " << prevLine << endl;
+				//cout << "Exiting while loop 2: " << wrootLine << " to " << prevLine << endl;
 				processIdx("next", intToStr(wrootLine), intToStr(prevLine));
 				switch_w_flag = 0;
 			}
 			else if (prevLine != irootLine && prevLine != curLineIdx && switch_e_flag == 0)
 			{
-					cout << "Updating table in loops: " << prevLine << " to " << curLineIdx << endl;
+					//cout << "Updating table in loops: " << prevLine << " to " << curLineIdx << endl;
 					processIdx("next", intToStr(prevLine), intToStr(curLineIdx));
 			
 			}
@@ -750,6 +750,8 @@ void SourceProcessor::processIdx(string option, string lhs = "None", string rhs 
 		Database::insertPrint(saveLineIdx);
 		Database::insertUse(saveLineIdx, "print", rhs, "print");
 		Database::insertUse(saveLineIdx, curProd, rhs, "procedure");
+
+		Database::insertParent("print", saveLineIdx, saveLineIdx);
 		useProcessor(saveLineIdx, rhs);
 
 		// Experiment push for print
@@ -766,6 +768,9 @@ void SourceProcessor::processIdx(string option, string lhs = "None", string rhs 
 		Database::insertRead(saveLineIdx);
 		Database::insertModifies(saveLineIdx, "read", lhs, "read");
 		Database::insertModifies(saveLineIdx, curProd, lhs, "procedure");
+
+		// iter 3: Seems like parents need to capture everything
+		Database::insertParent("read", saveLineIdx, saveLineIdx);
 		modifyProcessor(saveLineIdx, lhs);
 
 		// Experiment push for read
@@ -780,6 +785,8 @@ void SourceProcessor::processIdx(string option, string lhs = "None", string rhs 
 	{
 		Database::insertUse(intToStr(curLineIdx), lhs, rhs, "assign");
 		Database::insertModifies(intToStr(curLineIdx), rhs, lhs, "assign");
+
+		Database::insertParent("assignment", saveLineIdx, saveLineIdx);
 		useProcessor(saveLineIdx, rhs);
 		modifyProcessor(saveLineIdx, lhs);
 

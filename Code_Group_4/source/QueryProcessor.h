@@ -33,11 +33,11 @@ public:
 
     // Type support methods
     //void getLineIdx(string option, string queryLine, string valueName);
-    void getQueriedIdx(string type, vector<string> resultSpace);
+    vector<string> getQueriedIdx(string type, vector<string> resultSpace, string stmtLine);
     bool checkType(string token);
     void parseType();
     list<string> parseElemName();
-    string getType(string elemName);
+    string getType(string elemName, string table);
     void parseMQuery();
 
     // General supporting methods
@@ -46,4 +46,6 @@ public:
     void expectedSymbol(string symbol);
     bool checkSuch(string token);
     bool checkPatt(string token);
+    bool checkWild(string token);
+    bool checkNum(string token);
 };

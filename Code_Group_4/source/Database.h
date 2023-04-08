@@ -37,7 +37,7 @@ public:
     static void insertParent(string type, string parentLine, string childLine);
 
     // method to get all the parents from the database
-    static void getParents(vector<string>& results);
+    static void getParents(vector<string>& results, string stmtLine);
 
     // iter 2: method to get specific parents line from parents/parents* table
     static void getPLine(string table, string pType, vector<string>& results);
@@ -55,7 +55,7 @@ public:
     static void insertParentStar(string type, string parentLine, string childLine);
 
     // method to get all the parent* from the database
-    static void getParentStars(vector<string>& results);
+    static void getParentStars(vector<string>& results, string stmtLine);
     
 
     /// procedure ///

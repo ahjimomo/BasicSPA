@@ -307,8 +307,18 @@ void Database::getCLine(string table, string pType, vector<string>& results)
 {
     // clear existing results
     dbResults.clear();
+    string getCLineSQL;
 
-    string getCLineSQL = "SELECT DISTINCT childLine FROM " + table + " WHERE type = " + pType + ";";
+    if (pType == "_")
+    {
+        getCLineSQL = "SELECT DISTINCT childLine FROM " + table + ";";
+        cout << "Query: " << getCLineSQL << endl;
+    }
+    else
+    {
+        getCLineSQL = "SELECT DISTINCT childLine FROM " + table + " WHERE type = '" + pType + "';";
+        cout << "Query: " << getCLineSQL << endl;
+    }
     sqlite3_exec(dbConnection, getCLineSQL.c_str(), callback, 0, &errorMessage);
 
     postProcess(dbResults, results);
@@ -319,8 +329,17 @@ void Database::getPLine(string table, string pType, vector<string>& results)
 {
     // clear existing results
     dbResults.clear();
+    string getPLineSQL;
 
-    string getPLineSQL = "SELECT DISTINCT parentLine FROM " + table + " WHERE type = " + pType + ";";
+    if (pType == "_")
+    {
+        getPLineSQL = "SELECT DISTINCT parentLine FROM " + table + ";";
+    }
+    else
+    {
+        getPLineSQL = "SELECT DISTINCT parentLine FROM " + table + " WHERE type = '" + pType + "';";
+    }
+
     sqlite3_exec(dbConnection, getPLineSQL.c_str(), callback, 0, &errorMessage);
 
     postProcess(dbResults, results);
@@ -340,12 +359,12 @@ void Database::getIfs(vector<string>& results, string parentType, string parentO
 
     if (specificLine == "0")
     {
-        string getIfsSQL = "SELECT DISTINCT CASE " + parentOrChild + " WHEN 'root' THEN 0 ELSE " + parentOrChild + " END " + parentOrChild + " FROM parents WHERE type = " + parentType + ";";
+        string getIfsSQL = "SELECT DISTINCT CASE " + parentOrChild + " WHEN 'root' THEN 0 ELSE " + parentOrChild + " END " + parentOrChild + " FROM parents WHERE type = '" + parentType + "';";
         sqlite3_exec(dbConnection, getIfsSQL.c_str(), callback, 0, &errorMessage);
     }
     else
     {
-        string getIfsSQL = "SELECT DISTINCT CASE " + parentOrChild + " WHEN 'root' THEN 0 ELSE " + parentOrChild + " END " + parentOrChild + " FROM parents WHERE type = " + parentType + " AND " + parentOrChild + " = " + specificLine + ";";
+        string getIfsSQL = "SELECT DISTINCT CASE " + parentOrChild + " WHEN 'root' THEN 0 ELSE " + parentOrChild + " END " + parentOrChild + " FROM parents WHERE type = '" + parentType + "' AND " + parentOrChild + " = '" + specificLine + "';";
         sqlite3_exec(dbConnection, getIfsSQL.c_str(), callback, 0, &errorMessage);
     }
 
@@ -361,12 +380,12 @@ void Database::getWhiles(vector<string>& results, string parentType, string pare
 
     if (specificLine == "0")
     {
-        string getWhilesSQL = "SELECT DISTINCT CASE " + parentOrChild + " WHEN 'root' THEN 0 ELSE " + parentOrChild + " END " + parentOrChild + " FROM parents WHERE type = " + parentType + ";";
+        string getWhilesSQL = "SELECT DISTINCT CASE " + parentOrChild + " WHEN 'root' THEN 0 ELSE " + parentOrChild + " END " + parentOrChild + " FROM parents WHERE type = '" + parentType + "';";
         sqlite3_exec(dbConnection, getWhilesSQL.c_str(), callback, 0, &errorMessage);
     }
     else
     {
-        string getWhilesSQL = "SELECT DISTINCT CASE " + parentOrChild + " WHEN 'root' THEN 0 ELSE " + parentOrChild + " END " + parentOrChild + " FROM parents WHERE type = " + parentType + " AND " + parentOrChild + " = " + specificLine + ";";
+        string getWhilesSQL = "SELECT DISTINCT CASE " + parentOrChild + " WHEN 'root' THEN 0 ELSE " + parentOrChild + " END " + parentOrChild + " FROM parents WHERE type = '" + parentType + "' AND " + parentOrChild + " = '" + specificLine + "';";
         sqlite3_exec(dbConnection, getWhilesSQL.c_str(), callback, 0, &errorMessage);
     }
 
@@ -518,13 +537,13 @@ void Database::getPatterns(vector<string>& results, string lhs, string rhs) {
 }
 
 // iter 2: method to get all the parents* statements from the database
-void Database::getParentStars(vector<string>& results) {
+void Database::getParentStars(vector<string>& results, string stmtLine) {
     // clear the existing results
     dbResults.clear();
 
     // retrieve the procedures from the whiles table
     // The callback method is only used when there are results to be returned.
-    string getParentStarsSQL = "SELECT * FROM parentstars;";
+    string getParentStarsSQL = "SELECT DISTINCT parentLine FROM parentstars WHERE childLine = '" + stmtLine +"';";
     sqlite3_exec(dbConnection, getParentStarsSQL.c_str(), callback, 0, &errorMessage);
 
     // postprocess the results from the database so that the output is just a vector of procedure names
@@ -532,13 +551,13 @@ void Database::getParentStars(vector<string>& results) {
 }
 
 // iter 2: method to get all the parents statements from the database
-void Database::getParents(vector<string>& results) {
+void Database::getParents(vector<string>& results, string stmtLine) {
     // clear the existing results
     dbResults.clear();
 
     // retrieve the procedures from the whiles table
     // The callback method is only used when there are results to be returned.
-    string getParentsSQL = "SELECT * FROM parents;";
+    string getParentsSQL = "SELECT DISTINCT parentLine FROM parents WHERE childLine = '" + stmtLine + "';";
     sqlite3_exec(dbConnection, getParentsSQL.c_str(), callback, 0, &errorMessage);
 
     // postprocess the results from the database so that the output is just a vector of procedure names
