@@ -41,8 +41,8 @@ list<string> qFullComponent;                    // List to track the full query
 list<string> qComponent;                        // List to track the contained query (Store the query data type)
 list<string> sComponent;                        // List to track select component (Store the query data type)
 
-
 int wild_flag = 0;                              // int to track if there is a wild card tracking
+int num_flag = 0;                               // int to track if there is a line index value in clause
 
 unsigned int nested_depth = 0;                  // int to track the level of clause we are in
 vector<string> curClauseResults;                // Vector to track existing clause results
@@ -102,6 +102,7 @@ void QueryProcessor::extract(vector<string> tokens)
     vector<string> prod;                // Vector to track procedure results
     vector<string> var;                 // Vector to track variable results
     vector<string> cond;                // Vector to track string results
+    vector<string> curReturnLines;
 
     string currQ;                       // List to track action
     string prev;                        // List to track prev string we were in
@@ -115,6 +116,7 @@ void QueryProcessor::extract(vector<string> tokens)
         // 1. Start with mapping of queries elements in local mapping
         if (checkType(TokensList.front()) == true)
         {
+            //var.push_back(TokensList.front());
             parseType();
         }
         // 2. Extract final output required
@@ -156,88 +158,106 @@ void QueryProcessor::extract(vector<string> tokens)
         }
         // After the main selects are completed, it should either be such_that or pattern additional clause (ie. w1 such that ()..)
         // 3. Pattern clause
-        else if (checkPatt(TokensList.front()) == true)
-        {
-            // p1. Update depth level
-            nested_depth++;
-
-            qFullComponent.push_back(TokensList.front());
-            qComponent.push_back(TokensList.front());
-            string templhs;
-            string temprhs;
-            /*  cout << "!!!Tokens: " << TokensList.front() << endl;*/
-
-            while (TokensList.front() != "(") {
-                next_token();
-            }
-            next_token();
-
-            /*cout << "!!!Tokens1: " << TokensList.front() << endl;*/
-            //check lhs
-            while (TokensList.front() != ",") {
-                /*cout << "!!!Tokens2: " << TokensList.front() << endl;*/
-                if (TokensList.front() == "_") {
-                    templhs.push_back('%');
-                    next_token();
-                    /*cout << "!!!Tokens3: " << TokensList.front() << endl;*/
-                }
-                else if (TokensList.front() == "\"") {
-                    next_token();
-                    /*cout << "!!!Tokens4: " << TokensList.front() << endl;*/
-                }
-
-                else {
-                    if (templhs.empty() || templhs == "%") {
-                        templhs += TokensList.front();
-                    }
-                    else {
-                        templhs = templhs + " " + TokensList.front();
-                        /*cout << "!!!Tokens5: " << TokensList.front() << endl;*/
-                    }
-                    next_token();
-                }
-
-            }
-            next_token();
-            /*cout << "!!!Tokens6: " << TokensList.front() << endl;*/
-
-            if (templhs == "%")
-                templhs = "";
-
-            //check rhs
-            while (TokensList.front() != ")") {
-                if (TokensList.front() == "_") {
-                    temprhs.push_back('%');
-                    next_token();
-                }
-
-                else if (TokensList.front() == "\"") {
-                    next_token();
-                }
-
-                else 
-                {
-                    if (temprhs.empty() || temprhs == "%") {
-                        temprhs += TokensList.front();
-                    }
-                    else {
-                        temprhs = temprhs + " " + TokensList.front();
-                    }
-                    next_token();
-                }
-
-            }
-
-            if (temprhs == "%")
-                temprhs = "";
-
-            //cout << "pattern lhs: " << templhs << " rhs:" << temprhs;
-            Database::getPatterns(databaseResults, templhs, temprhs);
+        else if (checkPatt(TokensList.front()) == true){
+                parsePattern();
+//            p1. Update depth level
+//            nested_depth++;
+//
+//            qFullComponent.push_back(TokensList.front());
+//            qComponent.push_back(TokensList.front());
+//            string templhs;
+//            string tablelhs;
+//            string temprhs;
+//            /*  cout << "!!!Tokens: " << TokensList.front() << endl;*/
+//
+//            while (TokensList.front() != "(") {
+//                next_token();
+//            }
+//            next_token();
+//
+//            /*cout << "!!!Tokens1: " << TokensList.front() << endl;*/
+//            //check lhs
+//            while (TokensList.front() != ",") {
+//                /*cout << "!!!Tokens2: " << TokensList.front() << endl;*/
+//             /*   if (checkName(TokensList.front()) == true) {
+//                    tablelhs = getType(TokensList.front(), "none");
+//                    cout << "temp : " << tablelhs << endl;
+//                    cout << "lhs1: " << templhs << endl;
+//                    next_token();
+//                }*/
+//
+//                if (TokensList.front() == "_") {
+//                    templhs.push_back('%');
+//                    next_token();
+//                    cout << "lhs2: " << templhs << endl;
+//                }
+//
+//                else if (TokensList.front() == "\"") {
+//                    cout << "lhs3: " << templhs << endl;
+//                    next_token();
+//                    cout << "!!!Tokens4: " << TokensList.front() << endl;
+//                }
+//
+//                else {
+//                    if (templhs.empty() || templhs == "%") {
+//                        templhs += TokensList.front();
+//                        cout << "lhs4: " << templhs << endl;
+//                    }
+//                    else {
+//                        templhs = templhs + " " + TokensList.front();
+//                        cout << "lhs5: " << templhs << endl;
+//                    }
+//                    next_token();
+//                }
+//            }
+//            next_token();
+//            cout << "!!!Tokens6: " << TokensList.front() << endl;
+//
+//            if (templhs == "%")
+//                templhs = "";
+//
+//            if (templhs == "v") {
+//               tablelhs = getType(templhs, "none");
+//               templhs = "";
+//               cout << "temp2 : " << tablelhs << endl;
+//            }
+//            cout << "lhs6: " << templhs << endl;
+//
+//            //check rhs
+//            while (TokensList.front() != ")") {
+//
+//                if (TokensList.front() == "_") {
+//                    temprhs.push_back('%');
+//                    next_token();
+//                }
+//
+//                else if (TokensList.front() == "\"") {
+//                    next_token();
+//                }
+//
+//                else
+//                {
+//                    if (temprhs.empty() || temprhs == "%") {
+//                        temprhs += TokensList.front();
+//                    }
+//                    else {
+//                        temprhs = temprhs + " " + TokensList.front();
+//                    }
+//                    next_token();
+//                }
+//
+//            }
+//
+//            if (temprhs == "%")
+//                temprhs = "";
+//
+//
+//            cout << "pattern lhs: " << templhs << " rhs:" << temprhs << endl;
+//            Database::getPatterns(databaseResults, templhs, temprhs, tablelhs);
         }
         // 4. such that clause
         else if (checkSuch(TokensList.front()) == true)
         {
-            cout << "Commencing such that, current element: " << TokensList.front() << endl;
             // s1. Update depth level
             nested_depth++;
 
@@ -246,12 +266,12 @@ void QueryProcessor::extract(vector<string> tokens)
             {
                 // Extract indexes of current such that clause
                 next_token();
-                vector<string> curReturnLines = parseSuchThat();
+                curReturnLines = parseSuchThat();
 
                 // Process difference with current prior clause results and update answerLines vector
                 sort(tempResultLines.begin(), tempResultLines.end());
                 sort(curReturnLines.begin(), curReturnLines.end());
-                set_intersection(tempResultLines.begin(), tempResultLines.end(), curReturnLines.begin(), curReturnLines.end(), answerLines.begin());
+                set_intersection(tempResultLines.begin(), tempResultLines.end(), curReturnLines.begin(), curReturnLines.end(), back_inserter(answerLines));
             }
             // s2B. There are no prior clause
             else
@@ -259,27 +279,28 @@ void QueryProcessor::extract(vector<string> tokens)
                 // Extract indexes of current such that clause
                 next_token();
                 cout << "Commencing non-nested such that extraction, next element: " << TokensList.front() << endl;
-                vector<string> curReturnLines = parseSuchThat();
-                cout << "Where are we: " << TokensList.front() << endl;
+                curReturnLines = parseSuchThat();
 
-                // Update the tempResultLines for case there other clauses following
-                tempResultLines = curReturnLines;
-
-                // Update the answerLines for case where there are no other clauses following
-                answerLines = curReturnLines;
-            }
-            //next_token();
-
-            // 3B. Throw error if no answer is populated
-            if (answerLines.empty())
-            {
-                cout << "such that clause is returning nothing." << endl;
-                throw std::runtime_error("Issue with such that clause");
+                for (string item : curReturnLines)
+                {
+                    // Update the tempResultLines for case there other clauses following
+                    tempResultLines.push_back(item);
+                    // Update the answerLines for case where there are no other clauses following
+                    answerLines.push_back(item);
+                }
             }
         }
 
         // Move to next token
         next_token();
+    }
+
+    // 3B. Throw error if no answer is populated
+    if (answerLines.empty())
+    {
+        cout << "such that clause is returning nothing." << endl;
+        //throw std::runtime_error("Issue with such that clause");
+        answerLines.push_back("");
     }
 
     // End of tokens iteration: process answer Lines of all tokens
@@ -292,17 +313,106 @@ void QueryProcessor::extract(vector<string> tokens)
 
 
 ///// Support Methods /////
+void QueryProcessor::parsePattern() {
+    // p1. Update depth level
+    nested_depth++;
+
+    qFullComponent.push_back(TokensList.front());
+    qComponent.push_back(TokensList.front());
+    string templhs;
+    string tablelhs;
+    string temprhs;
+    /*  cout << "!!!Tokens: " << TokensList.front() << endl;*/
+
+    while (TokensList.front() != "(") {
+        next_token();
+    }
+    next_token();
+    /*cout << "!!!Tokens1: " << TokensList.front() << endl;*/
+    //check lhs
+    while (TokensList.front() != ",") {
+        /*cout << "!!!Tokens2: " << TokensList.front() << endl;*/
+        /*   if (checkName(TokensList.front()) == true) {
+           tablelhs = getType(TokensList.front(), "none");
+           cout << "temp : " << tablelhs << endl;
+           cout << "lhs1: " << templhs << endl;
+           next_token();
+       }*/
+        if (TokensList.front() == "_") {
+            templhs.push_back('%');
+            next_token();
+            cout << "lhs2: " << templhs << endl;
+        } else if (TokensList.front() == "\"") {
+            cout << "lhs3: " << templhs << endl;
+            next_token();
+            cout << "!!!Tokens4: " << TokensList.front() << endl;
+        } else {
+            if (templhs.empty() || templhs == "%") {
+                templhs += TokensList.front();
+                cout << "lhs4: " << templhs << endl;
+            } else {
+                templhs = templhs + " " + TokensList.front();
+                cout << "lhs5: " << templhs << endl;
+            }
+            next_token();
+        }
+    }
+    next_token();
+    cout << "!!!Tokens6: " << TokensList.front() << endl;
+
+    if (templhs == "%")
+        templhs = "";
+
+    if (templhs == "v") {
+        tablelhs = getType(templhs, "none");
+        templhs = "";
+        cout << "temp2 : " << tablelhs << endl;
+    }
+    cout << "lhs6: " << templhs << endl;
+
+    //check rhs
+    while (TokensList.front() != ")") {
+
+        if (TokensList.front() == "_") {
+            temprhs.push_back('%');
+            next_token();
+        } else if (TokensList.front() == "\"") {
+            next_token();
+        } else {
+            if (temprhs.empty() || temprhs == "%") {
+                temprhs += TokensList.front();
+            } else {
+                temprhs = temprhs + " " + TokensList.front();
+            }
+            next_token();
+        }
+
+    }
+
+    if (temprhs == "%")
+        temprhs = "";
+
+    cout << "pattern lhs: " << templhs << " rhs:" << temprhs << endl;
+    Database::getPatterns(databaseResults, templhs, temprhs, tablelhs);
+}
+
+
+
 // iter 2: Support method to parse element(s) queried belonging to any of the type of Data type
 vector<string> QueryProcessor::parseSuchThat()
 {
+    vector<string> parseResults;
+
     // Case: Parent / Parent*
     if (TokensList.front() == "Parent" | TokensList.front() == "parent")
     {
-        return parseTable("parents");
+        parseResults = parseTable("parents");
+        return parseResults;
     }
     else if (TokensList.front() == "Parent*" | TokensList.front() == "parent*")
     {
-        return parseTable("parentstars");
+        parseResults = parseTable("parentstars");
+        return parseResults;
     }
     // Case: Next / Next*
     else if (TokensList.front() == "Next" | TokensList.front() == "next")
@@ -348,24 +458,38 @@ vector<string> QueryProcessor::parseTable(string table)
     vector<string> rootIdx;
     vector<string> childIdx;
     vector<string> queryIdx;
+    vector<string> resultIdx;
     string pType;
     string cType;
 
-    // p1a. Check for wild card
-    pType = getType(TokensList.front(), table);
-    cout << "Parent type extracted is: " << pType << endl;
-    cout << "Table check is: " << table << endl;
-
-    // p3. Get all the parentLine and childLine indexes
-    if (table == "parents" | table == "parentsStar")
+    // p1a. Check if value is a LineIdx instead of wild card of variable
+    if (checkNum(TokensList.front()) == true)
     {
-        //Database::getPLine(table, pType, rootIdx);
-        Database::getCLine(table, pType, childIdx);
+        num_flag = 1;
+        pType = table;
+        cout << "Parent's a number!" << TokensList.front() << endl;
+    }
+    // p1b. Check for wild card or other type of variables
+    else
+    {
+        // p1a. Check for wild card or type of variable
+        pType = getType(TokensList.front(), table);
+        cout << "Parent type extracted is: " << pType << endl;
+        cout << "Table check is: " << table << endl;
+    }
+
+    // p3. Get all the ParentLine indexes
+    if (table == "parents" | table == "parentstars")
+    {
+        Database::getPLine(table, pType, childIdx, num_flag, TokensList.front());
     }
     else if (table == "modifies")
     {
-        Database::getMLine(table, pType, childIdx);
+        Database::getMLine(table, pType, childIdx, num_flag, TokensList.front());
     }
+
+    // Reset number flag
+    num_flag = 0;
     
     // Test printing
     cout << "Returned index length : " << childIdx.size() << endl;
@@ -374,12 +498,52 @@ vector<string> QueryProcessor::parseTable(string table)
         cout << child << endl;
     }
 
-    // p4a. Get the child query type of the nested value (ie. Parent(w, a)..)
+    // p4. Get the child query type of the nested value (ie. Parent(w, a)..)
     next_token();
     expectedSymbol(",");
 
+    // p4a. Check if 2nd part is line index value
+    if (checkNum(TokensList.front()) == true)
+    {
+        num_flag = 1;
+        cType = table;
+        cout << "Child is a number!" << TokensList.front() << endl;
+
+        // p5. Get the line indexes of the specified queried values
+        if (table == "parents" | table == "parentstars")
+        {
+            Database::getCLine(table, cType, queryIdx, num_flag, TokensList.front(), TokensList.front());
+        }
+        else if (table == "modifies")
+        {
+            Database::getMLine(table, cType, queryIdx, num_flag, TokensList.front());
+        }
+
+        // p6. Store the child index(es) found as the current temp results
+        // sorting the vectors
+        sort(childIdx.begin(), childIdx.end());
+        sort(queryIdx.begin(), queryIdx.end());
+
+        cout << "Returned query index length : " << queryIdx.size() << endl;
+
+        for (string item : queryIdx)
+        {
+            cout << "Item in returned query: " << item << endl;
+        }
+
+        // Get the difference as existing result
+        set_intersection(childIdx.begin(), childIdx.end(), queryIdx.begin(), queryIdx.end(), back_inserter(resultIdx));
+
+        cout << "Size of result: " << resultIdx.size() << " - what's inside the result" << endl;
+        for (string item : resultIdx)
+        {
+            cout << "In result: " << item << endl;
+        }
+
+        return resultIdx;
+    }
     // p4b. If 2nd part is also a wildcard, then the Parent index is to be returned since it will be the same
-    if (checkWild(TokensList.front()) == true)
+    else if (checkWild(TokensList.front()) == true)
     {
         return childIdx;
     }
@@ -391,16 +555,35 @@ vector<string> QueryProcessor::parseTable(string table)
         cout << "Child type extracted is: " << cType << endl;
 
         // p5. Get the line indexes of the specified queried values
-        queryIdx = getQueriedIdx(cType, queryIdx, TokensList.front());
+        if (table == "parents" | table == "parentstars")
+        {
+            Database::getCLine(table, cType, queryIdx, num_flag, TokensList.front(), "0");
+        }
+        else if (table == "modifies")
+        {
+            Database::getMLine(table, cType, queryIdx, num_flag, TokensList.front());
+        }
 
         // p6. Store the child index(es) found as the current temp results
         // sorting the vectors
         sort(childIdx.begin(), childIdx.end());
         sort(queryIdx.begin(), queryIdx.end());
 
+        cout << "Returned query index length : " << queryIdx.size() << endl;
+
+        for (string item : queryIdx)
+        {
+            cout << "Item in returned query: " << item << endl;
+        }
+
         // Get the difference as existing result
-        vector<string> resultIdx;
-        set_intersection(childIdx.begin(), childIdx.end(), resultIdx.begin(), resultIdx.end(), resultIdx.begin());
+        set_intersection(childIdx.begin(), childIdx.end(), queryIdx.begin(), queryIdx.end(), back_inserter(resultIdx));
+
+        cout << "Size of result: " << resultIdx.size() << " - what's inside the result" << endl;
+        for (string item : resultIdx)
+        {
+            cout << "In result: " << item << endl;
+        }
 
         // p7. Return result
         //expectedSymbol(")");
@@ -410,7 +593,7 @@ vector<string> QueryProcessor::parseTable(string table)
 }
 
 // iter 2: Support method to extract index of values queried (Similar to `querySingle` but returning Line Idx instead..)
-vector<string> QueryProcessor::getQueriedIdx(string qType, vector<string> resultSpace, string stmtLine)
+vector<string> QueryProcessor::getQueriedIdx(string qType, vector<string> resultSpace, string Line)
 {
     // 1. assignment
     if (qType == "assign")
@@ -436,12 +619,12 @@ vector<string> QueryProcessor::getQueriedIdx(string qType, vector<string> result
     // 6. while
     else if (qType == "while")
     {
-        Database::getWhiles(resultSpace, "while", "parentLine", stmtLine);
+        Database::getWhiles(resultSpace, "while", "parentLine", Line);
     }
     // 7. if
     else if (qType == "if")
     {
-        Database::getIfs(resultSpace, "if", "parentLine", stmtLine);
+        Database::getIfs(resultSpace, "if", "parentLine", Line);
     }
     // 8. variable
     else if (qType == "variable")
@@ -451,18 +634,18 @@ vector<string> QueryProcessor::getQueriedIdx(string qType, vector<string> result
     // 9. Parents 
     else if (qType == "parents")
     {
-        // get parents index
-        Database::getParents(resultSpace, stmtLine);
+        // get child index
+        Database::getParents(resultSpace, Line);
     }
     // 10. Parents*
     else if (qType == "parents*")
     {
-        // get all parents* index
-        Database::getParentStars(resultSpace, stmtLine);
+        // get all child* index
+        Database::getParentStars(resultSpace, Line);
     }
     else if (qType == "modify")
     {
-        // get modifies index
+        Database::getModifies(resultSpace);
     }
 
     return resultSpace;
@@ -544,7 +727,8 @@ void QueryProcessor::querySingle(string qType, string option)
 /// elemName: The element such as [ie. (a, w) / (_, w1), etc.]
 string QueryProcessor::getType(string elemName, string table)
 {
-    // 1. Process wildcard
+
+    // A. Process wildcard
     if (checkWild(elemName) == true)
     {
         auto items = elemMap.find(sComponent.front());
@@ -552,6 +736,7 @@ string QueryProcessor::getType(string elemName, string table)
         cout << "typeFound is: " << typeFound << endl;;
         return typeFound;
     }
+    // B. non-wild type
     else
     {
         auto items = elemMap.find(elemName);
@@ -568,7 +753,6 @@ string QueryProcessor::getType(string elemName, string table)
         {
             return table;
         }
-
     }
 }
 
@@ -613,7 +797,6 @@ void QueryProcessor::parseType()
             // Get the variableName and map it
             next_token();
             elemList = parseElemName();
-
             for (string item : elemList)
             {
                 elemMap[item] = elem;
@@ -785,4 +968,15 @@ bool QueryProcessor::checkNum(string token)
 {
     // Return boolean if element is an integer
     return regex_match(token, regex(NUM_EXPR));
+}
+
+// iter 3: process integer to string
+string QueryProcessor::intToStr(int value)
+{
+    string valueInStr;
+    stringstream OriginalInt;
+    OriginalInt << value;
+    OriginalInt >> valueInStr;
+
+    return valueInStr;
 }

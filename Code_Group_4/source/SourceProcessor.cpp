@@ -752,6 +752,7 @@ void SourceProcessor::processIdx(string option, string lhs = "None", string rhs 
 		Database::insertUse(saveLineIdx, curProd, rhs, "procedure");
 
 		Database::insertParent("print", saveLineIdx, saveLineIdx);
+		Database::insertParentStar("print", saveLineIdx, saveLineIdx);
 		useProcessor(saveLineIdx, rhs);
 
 		// Experiment push for print
@@ -771,6 +772,7 @@ void SourceProcessor::processIdx(string option, string lhs = "None", string rhs 
 
 		// iter 3: Seems like parents need to capture everything
 		Database::insertParent("read", saveLineIdx, saveLineIdx);
+		Database::insertParentStar("read", saveLineIdx, saveLineIdx);
 		modifyProcessor(saveLineIdx, lhs);
 
 		// Experiment push for read
@@ -786,7 +788,8 @@ void SourceProcessor::processIdx(string option, string lhs = "None", string rhs 
 		Database::insertUse(intToStr(curLineIdx), lhs, rhs, "assign");
 		Database::insertModifies(intToStr(curLineIdx), rhs, lhs, "assign");
 
-		Database::insertParent("assignment", saveLineIdx, saveLineIdx);
+		Database::insertParent("assign", saveLineIdx, saveLineIdx);
+		Database::insertParentStar("assign", saveLineIdx, saveLineIdx);
 		useProcessor(saveLineIdx, rhs);
 		modifyProcessor(saveLineIdx, lhs);
 

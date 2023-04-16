@@ -40,10 +40,10 @@ public:
     static void getParents(vector<string>& results, string stmtLine);
 
     // iter 2: method to get specific parents line from parents/parents* table
-    static void getPLine(string table, string pType, vector<string>& results);
+    static void getPLine(string table, string pType, vector<string>& results, int flag, string indexNum);
 
     // iter 2: method to get specific child lines from parents/parents* table
-    static void getCLine(string table, string pType, vector<string>& results);
+    static void getCLine(string table, string pType, vector<string>& results, int flag, string indexNum, string parentNum);
 
     // method to get all the while's parentLine from the database
     static void getWhiles(vector<string>& results, string parentType, string parentOrChild, string specificLine);
@@ -122,7 +122,7 @@ public:
     static void insertPattern(string patternLine, string lhs, string rhs);
 
     // method to get all the patterns from the database
-    static void getPatterns(vector<string>& results, string lhs, string rhs);
+    static void getPatterns(vector<string>& results, string lhs, string rhs, string tablelhs);
 
 
     /// uses ///
@@ -180,7 +180,7 @@ public:
     // method to get all the modifies (assigner, assigned, type) from the database
     static void getModifies(vector<string>& results);
 
-    static void getMLine(string table, string pType, vector<string>& results);
+    static void getMLine(string table, string pType, vector<string>& results, int flag, string LineIndex);
 
     /// [Experimental] Main Dataset ///
     static void insertMain(string Idx, string type, string procedure, string variable, string lhs, string rhs);

@@ -30,6 +30,7 @@ public:
     // Such that support methods
     vector<string> parseSuchThat();
     vector<string> parseTable(string table);
+    void parsePattern();
 
     // Type support methods
     //void getLineIdx(string option, string queryLine, string valueName);
@@ -48,4 +49,5 @@ public:
     bool checkPatt(string token);
     bool checkWild(string token);
     bool checkNum(string token);
+    string intToStr(int value);
 };
